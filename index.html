@@ -20,10 +20,11 @@
         .btn-confirmado { background: #444; color: #888; margin-top: 5px; }
         .btn-excluir { background: #aa0000; color: white; margin-top: 5px; font-size: 0.8em; }
         
-        /* Estilos novos para os placares e PIX */
-        .match-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-        .match-row span { flex: 1; text-align: center; font-weight: bold; }
-        .match-row input { width: 45px; text-align: center; margin: 0 5px; font-size: 1.2em; padding: 5px; }
+        /* Estilos dos placares e datas */
+        .match-date { text-align: center; font-size: 0.85em; color: #00ff87; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
+        .match-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
+        .match-row span { flex: 1; text-align: center; font-weight: bold; font-size: 0.9em; }
+        .match-row input { width: 45px; text-align: center; margin: 0 5px; font-size: 1.2em; padding: 5px; border-radius: 5px; border: none; background: #111; color: white; }
         #pix-area { display: none; text-align: center; background: #2a2a35; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px dashed var(--primary); }
         #pix-area img { width: 150px; height: 150px; border-radius: 10px; margin: 10px 0; background: #fff; }
     </style>
@@ -45,20 +46,31 @@
                 <h3>⚽ Jogos da 1ª Rodada</h3>
                 <p style="font-size: 0.8em; color: #aaa;">Preencha os seus placares abaixo:</p>
                 
+                <div class="match-date">📅 11 de Junho (Quinta) - 16:00</div>
                 <div class="match-row">
-                    <span>🇧🇷 BRA</span>
+                    <span>🇲🇽 México</span>
                     <input type="number" id="j1-casa" min="0" placeholder="0">
                     <span>X</span>
                     <input type="number" id="j1-fora" min="0" placeholder="0">
-                    <span>SUI 🇨🇭</span>
+                    <span>🇵🇱 Polônia</span>
                 </div>
 
+                <div class="match-date">📅 15 de Junho (Segunda) - 16:00</div>
                 <div class="match-row">
-                    <span>🇦🇷 ARG</span>
+                    <span>🇧🇷 Brasil</span>
                     <input type="number" id="j2-casa" min="0" placeholder="0">
                     <span>X</span>
                     <input type="number" id="j2-fora" min="0" placeholder="0">
-                    <span>MEX 🇲🇽</span>
+                    <span>🇨🇭 Suíça</span>
+                </div>
+
+                <div class="match-date">📅 16 de Junho (Terça) - 13:00</div>
+                <div class="match-row">
+                    <span>🇦🇷 Argentina</span>
+                    <input type="number" id="j3-casa" min="0" placeholder="0">
+                    <span>X</span>
+                    <input type="number" id="j3-fora" min="0" placeholder="0">
+                    <span>🇺🇾 Uruguai</span>
                 </div>
             </div>
 
@@ -70,14 +82,16 @@
                     <optgroup label="Europa"><option value="França">França</option><option value="Inglaterra">Inglaterra</option><option value="Alemanha">Alemanha</option><option value="Espanha">Espanha</option><option value="Portugal">Portugal</option></optgroup>
                 </select>
                 
-                <button onclick="salvarTudo()">SALVAR APOSTAS (R$ 50)</button>
+                <button onclick="salvarTudo()">SALVAR APOSTAS (R$ 10)</button>
 
                 <div id="pix-area">
                     <h3 style="color: var(--primary); margin: 0;">✅ Palpites Salvos!</h3>
-                    <p>Para validar sua aposta, efetue o pagamento de R$ 50,00.</p>
+                    <p>Para validar sua aposta, efetue o pagamento de <strong>R$ 10,00</strong>.</p>
+                    
                     <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR Code PIX">
+                    
                     <p style="font-size: 0.9em; margin-bottom: 5px;">Ou use a Chave PIX Copia e Cola:</p>
-                    <input type="text" value="SUA_CHAVE_PIX_AQUI" readonly id="chave-pix" style="text-align: center; margin: 0; color: #00ff87; border: 1px solid #00ff87;">
+                    <input type="text" value="SUA_CHAVE_PIX_AQUI" readonly id="chave-pix" style="text-align: center; margin: 0; color: #00ff87; border: 1px solid #00ff87; background: #111;">
                 </div>
             </div>
             
@@ -114,14 +128,11 @@
                     document.querySelector('.player-nickname').innerText = "Olá, " + dados.apelido;
                     
                     if(dados.campeaoApostado) document.getElementById('master-champion-select').value = dados.campeaoApostado;
-                    if(dados.jogo1) {
-                        document.getElementById('j1-casa').value = dados.jogo1.split('x')[0];
-                        document.getElementById('j1-fora').value = dados.jogo1.split('x')[1];
-                    }
-                    if(dados.jogo2) {
-                        document.getElementById('j2-casa').value = dados.jogo2.split('x')[0];
-                        document.getElementById('j2-fora').value = dados.jogo2.split('x')[1];
-                    }
+                    
+                    // Carrega os 3 jogos
+                    if(dados.jogo1) { document.getElementById('j1-casa').value = dados.jogo1.split('x')[0]; document.getElementById('j1-fora').value = dados.jogo1.split('x')[1]; }
+                    if(dados.jogo2) { document.getElementById('j2-casa').value = dados.jogo2.split('x')[0]; document.getElementById('j2-fora').value = dados.jogo2.split('x')[1]; }
+                    if(dados.jogo3) { document.getElementById('j3-casa').value = dados.jogo3.split('x')[0]; document.getElementById('j3-fora').value = dados.jogo3.split('x')[1]; }
 
                     if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
                         document.getElementById('admin-panel').style.display = 'block';
@@ -140,7 +151,7 @@
                     const u = doc.data();
                     html += `<div class="card">
                         <strong>${u.apelido}</strong> - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}<br>
-                        <span style="font-size: 0.8em; color: #aaa;">Cam: ${u.campeaoApostado || '---'} | J1: ${u.jogo1 || '-'} | J2: ${u.jogo2 || '-'}</span><br>
+                        <span style="font-size: 0.75em; color: #aaa;">Cam: ${u.campeaoApostado || '-'} | J1: ${u.jogo1 || '-'} | J2: ${u.jogo2 || '-'} | J3: ${u.jogo3 || '-'}</span><br>
                         <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
                             ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
                         </button>
@@ -156,13 +167,12 @@
 
         function salvarTudo() {
             const campeao = document.getElementById('master-champion-select').value;
-            const j1c = document.getElementById('j1-casa').value;
-            const j1f = document.getElementById('j1-fora').value;
-            const j2c = document.getElementById('j2-casa').value;
-            const j2f = document.getElementById('j2-fora').value;
+            const j1c = document.getElementById('j1-casa').value; const j1f = document.getElementById('j1-fora').value;
+            const j2c = document.getElementById('j2-casa').value; const j2f = document.getElementById('j2-fora').value;
+            const j3c = document.getElementById('j3-casa').value; const j3f = document.getElementById('j3-fora').value;
             const cel = localStorage.getItem('bolao_user_celular');
 
-            if(!campeao || j1c==="" || j1f==="" || j2c==="" || j2f==="") {
+            if(!campeao || j1c==="" || j1f==="" || j2c==="" || j2f==="" || j3c==="" || j3f==="") {
                 alert("Por favor, preencha todos os placares e escolha o campeão.");
                 return;
             }
@@ -170,7 +180,8 @@
             db.collection("usuarios").doc(cel).update({
                 campeaoApostado: campeao,
                 jogo1: j1c + "x" + j1f,
-                jogo2: j2c + "x" + j2f
+                jogo2: j2c + "x" + j2f,
+                jogo3: j3c + "x" + j3f
             }).then(() => {
                 document.getElementById('pix-area').style.display = 'block';
                 document.getElementById('pix-area').scrollIntoView({ behavior: 'smooth' });
