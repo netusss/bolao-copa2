@@ -64,21 +64,21 @@
         </section>
 
         <section id="games-screen" class="screen">
-            <h2 class="player-nickname" style="color: var(--primary);">Bem-vindo</h2>
+            <h2 class="player-nickname" style="color: var(--primary); text-align: center; margin-bottom: 20px;">Bem-vindo</h2>
             
-            <div class="card">
-                <h3>⚽ Palpites dos Jogos</h3>
-                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha os placares e clique no botão de aposta do jogo desejado.</p>
-                <div id="jogos-container"></div>
-            </div>
-
-            <div class="card">
-                <h3>🏆 Aposta Master</h3>
-                <p style="font-size: 0.8em; color: #aaa;">Quem será o grande Campeão do Mundo?</p>
+            <div class="card" style="border-color: var(--primary);">
+                <h3 style="color: var(--primary); margin-top: 0;">🏆 Aposta Master</h3>
+                <p style="font-size: 0.85em; color: #ccc;">Quem será o grande Campeão do Mundo?</p>
                 <select id="master-champion-select">
                     <option value="">Escolha a seleção campeã...</option>
                 </select>
                 <button class="btn-master" onclick="salvarCampeao()">SALVAR SELEÇÃO CAMPEÃ (R$ 10,00)</button>
+            </div>
+
+            <div class="card">
+                <h3>⚽ Palpites dos Jogos</h3>
+                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha os placares e clique no botão de aposta do jogo desejado.</p>
+                <div id="jogos-container"></div>
             </div>
 
             <div id="pix-area" class="card">
