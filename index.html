@@ -8,20 +8,21 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         :root { --bg: #0f0f12; --card: #17171f; --primary: #00ff87; --text: #fff; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; min-height: 100vh; padding: 20px; margin: 0; }
         .app-container { width: 100%; max-width: 450px; }
         .screen { display: none; }
         .screen.active { display: block; }
         .card { background: var(--card); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; }
         button { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; font-size: 1.1em; cursor: pointer; margin-top: 10px; }
-        select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #444; }
+        select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #444; box-sizing: border-box; }
         
         .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
         .btn-pago { background: #0088ff; color: white; margin-top: 5px; font-size: 0.9em; padding: 8px;}
         .btn-confirmado { background: #444; color: #888; margin-top: 5px; font-size: 0.9em; padding: 8px;}
         .btn-excluir { background: #aa0000; color: white; margin-top: 5px; font-size: 0.8em; padding: 8px;}
+        .btn-sair { background: #333; color: white; font-size: 0.9em; margin-top: 20px; border: 1px solid #555; }
         
-        #jogos-container { max-height: 450px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; border: 1px solid #333; padding: 10px; border-radius: 8px; background: #1a1a24; }
+        #jogos-container { max-height: 500px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; border: 1px solid #333; padding: 10px; border-radius: 8px; background: #1a1a24; }
         #jogos-container::-webkit-scrollbar { width: 6px; }
         #jogos-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
         
@@ -76,6 +77,9 @@
                 <h3 style="color:red">🛠️ PAINEL DE CONTROLE</h3>
                 <div id="lista-pagamentos"></div>
             </div>
+
+            <button class="btn-sair" onclick="sairConta()">Sair / Trocar de Conta</button>
+
         </section>
     </div>
 
@@ -86,4 +90,212 @@
         const CELULAR_ADMIN = "75992637960";
 
         const gruposCopa = [
-            { nome: "Grupo A", times: ["🇲🇽 México", "🇿🇦 África do Sul", "🇰🇷 Coreia do Sul", "🇨🇿 Rep. Tcheca"], datas: ["11/06 16:00", "11/06 23:
+            { nome: "Grupo A", times: ["🇲🇽 México", "🇿🇦 África do Sul", "🇰🇷 Coreia do Sul", "🇨🇿 Rep. Tcheca"], datas: ["11/06 16:00", "11/06 23:00", "18/06 13:00", "18/06 22:00", "24/06 22:00", "24/06 22:00"] },
+            { nome: "Grupo B", times: ["🇨🇦 Canadá", "🇧🇦 Bósnia", "🇶🇦 Catar", "🇨🇭 Suíça"], datas: ["12/06 16:00", "13/06 16:00", "18/06 16:00", "18/06 19:00", "24/06 16:00", "24/06 16:00"] },
+            { nome: "Grupo C", times: ["🇧🇷 Brasil", "🇲🇦 Marrocos", "🇭🇹 Haiti", "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escócia"], datas: ["13/06 19:00", "13/06 22:00", "19/06 19:00", "19/06 21:30", "24/06 19:00", "24/06 19:00"] },
+            { nome: "Grupo D", times: ["🇺🇸 EUA", "🇵🇾 Paraguai", "🇦🇺 Austrália", "🇹🇷 Turquia"], datas: ["12/06 22:00", "14/06 01:00", "19/06 16:00", "19/06 01:00", "25/06 23:00", "25/06 23:00"] },
+            { nome: "Grupo E", times: ["🇩🇪 Alemanha", "🇨🇼 Curaçao", "🇨🇮 Costa do Marfim", "🇪🇨 Equador"], datas: ["14/06 14:00", "14/06 20:00", "20/06 17:00", "20/06 21:00", "25/06 16:00", "25/06 16:00"] },
+            { nome: "Grupo F", times: ["🇳🇱 Holanda", "🇯🇵 Japão", "🇸🇪 Suécia", "🇹🇳 Tunísia"], datas: ["14/06 17:00", "14/06 23:00", "20/06 14:00", "20/06 01:00", "25/06 20:00", "25/06 20:00"] },
+            { nome: "Grupo G", times: ["🇧🇪 Bélgica", "🇪🇬 Egito", "🇮🇷 Irã", "🇳🇿 Nova Zelândia"], datas: ["15/06 16:00", "15/06 22:00", "21/06 16:00", "21/06 22:00", "26/06 00:00", "26/06 00:00"] },
+            { nome: "Grupo H", times: ["🇪🇸 Espanha", "🇨🇻 Cabo Verde", "🇸🇦 Arábia Saudita", "🇺🇾 Uruguai"], datas: ["15/06 13:00", "15/06 19:00", "21/06 13:00", "21/06 19:00", "26/06 21:00", "26/06 21:00"] },
+            { nome: "Grupo I", times: ["🇫🇷 França", "🇸🇳 Senegal", "🇮🇶 Iraque", "🇳🇴 Noruega"], datas: ["16/06 16:00", "16/06 19:00", "22/06 19:00", "22/06 21:00", "26/06 16:00", "26/06 16:00"] },
+            { nome: "Grupo J", times: ["🇦🇷 Argentina", "🇩🇿 Argélia", "🇦🇹 Áustria", "🇯🇴 Jordânia"], datas: ["16/06 22:00", "16/06 01:00", "22/06 14:00", "22/06 00:00", "27/06 23:00", "27/06 23:00"] },
+            { nome: "Grupo K", times: ["🇵🇹 Portugal", "🇨🇩 RD Congo", "🇺🇿 Uzbequistão", "🇨🇴 Colômbia"], datas: ["17/06 14:00", "17/06 23:00", "23/06 14:00", "23/06 23:00", "27/06 20:30", "27/06 20:30"] },
+            { nome: "Grupo L", times: ["🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra", "🇭🇷 Croácia", "🇬🇭 Gana", "🇵🇦 Panamá"], datas: ["17/06 17:00", "17/06 20:00", "23/06 17:00", "23/06 20:00", "27/06 18:00", "27/06 19:00"] }
+        ];
+
+        const confrontos = [[0,1], [2,3], [3,1], [0,2], [1,2], [3,0]];
+
+        function iniciarTabela() {
+            const container = document.getElementById('jogos-container');
+            const selectMaster = document.getElementById('master-champion-select');
+            let todosOsJogos = [];
+
+            gruposCopa.forEach((grupo, i) => {
+                const optGroup = document.createElement('optgroup');
+                optGroup.label = grupo.nome;
+                grupo.times.forEach(time => {
+                    const opt = document.createElement('option');
+                    opt.value = time; opt.innerText = time;
+                    optGroup.appendChild(opt);
+                });
+                selectMaster.appendChild(optGroup);
+
+                confrontos.forEach((comb, j) => {
+                    const dataString = grupo.datas[j];
+                    const partesEspaco = dataString.split(' ');
+                    const partesBarra = partesEspaco[0].split('/');
+                    const partesDoisPontos = partesEspaco[1].split(':');
+                    const chaveOrdem = parseInt(partesBarra[1]) * 1000000 + parseInt(partesBarra[0]) * 10000 + parseInt(partesDoisPontos[0]) * 100 + parseInt(partesDoisPontos[1]);
+
+                    todosOsJogos.push({
+                        idC: `g${i}_${j}_c`,
+                        idF: `g${i}_${j}_f`,
+                        timeC: grupo.times[comb[0]],
+                        timeF: grupo.times[comb[1]],
+                        data: dataString,
+                        grupo: grupo.nome,
+                        chave: chaveOrdem
+                    });
+                });
+            });
+
+            todosOsJogos.sort((a, b) => a.chave - b.chave);
+            let htmlJogos = "";
+            let dataAtual = "";
+
+            todosOsJogos.forEach(jogo => {
+                const dataSemHora = jogo.data.split(' ')[0];
+                const horaJogo = jogo.data.split(' ')[1];
+
+                if (dataSemHora !== dataAtual) {
+                    htmlJogos += `<h4 style="color:var(--primary); margin-top:20px; margin-bottom:5px; border-bottom: 1px solid #444; padding-bottom:5px;">📅 Jogos do dia ${dataSemHora}</h4>`;
+                    dataAtual = dataSemHora;
+                }
+
+                htmlJogos += `
+                <div class="match-date" style="margin-top: 10px;">⏰ ${horaJogo} - ${jogo.grupo}</div>
+                <div class="match-row">
+                    <span>${jogo.timeC}</span>
+                    <input type="number" id="${jogo.idC}" min="0" placeholder="0">
+                    <span>X</span>
+                    <input type="number" id="${jogo.idF}" min="0" placeholder="0">
+                    <span>${jogo.timeF}</span>
+                </div>`;
+            });
+            container.innerHTML = htmlJogos;
+        }
+        
+        function conectarUsuario() {
+            const btn = document.getElementById('btn-entrar');
+            btn.innerText = "Conectando, aguarde...";
+            
+            let celular = document.getElementById('login-celular').value;
+            celular = celular.replace(/\D/g, '');
+
+            if(!celular) {
+                btn.innerText = "ENTRAR NO BOLÃO";
+                return alert("Por favor, preencha o número de celular corretamente!");
+            }
+
+            db.collection("usuarios").doc(celular).set({
+                nome: document.getElementById('login-nome').value,
+                apelido: document.getElementById('login-apelido').value,
+                pago: false
+            }, {merge: true}).then(() => {
+                localStorage.setItem('bolao_user_celular', celular);
+                location.reload();
+            }).catch(erro => {
+                alert("⚠️ Erro de conexão com o banco: " + erro.message);
+                btn.innerText = "ENTRAR NO BOLÃO";
+            });
+        }
+
+        function carregarSessao(celular) {
+            db.collection("usuarios").doc(celular).get().then(doc => {
+                if(doc.exists) {
+                    const dados = doc.data();
+                    document.querySelector('.player-nickname').innerText = "Olá, " + dados.apelido;
+                    
+                    if(dados.campeaoApostado) document.getElementById('master-champion-select').value = dados.campeaoApostado;
+                    
+                    if(dados.jogos) {
+                        for (let idJogo in dados.jogos) {
+                            let placar = dados.jogos[idJogo];
+                            let partes = placar.split('x');
+                            if(document.getElementById(idJogo + '_c')) document.getElementById(idJogo + '_c').value = partes[0];
+                            if(document.getElementById(idJogo + '_f')) document.getElementById(idJogo + '_f').value = partes[1];
+                        }
+                    }
+
+                    if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
+                        document.getElementById('admin-panel').style.display = 'block';
+                        carregarListaPagamentos();
+                    }
+                    document.getElementById('login-screen').classList.remove('active');
+                    document.getElementById('games-screen').classList.add('active');
+                }
+            }).catch(erro => {
+                alert("⚠️ Erro ao carregar sua conta: " + erro.message);
+            });
+        }
+
+        function carregarListaPagamentos() {
+            db.collection("usuarios").onSnapshot(snapshot => {
+                let html = "";
+                snapshot.forEach(doc => {
+                    const u = doc.data();
+                    let totalJogos = 0;
+                    if(u.jogos) {
+                        for(let k in u.jogos) totalJogos++;
+                    }
+                    html += `<div class="card">
+                        <strong>${u.apelido}</strong> - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}<br>
+                        <span style="font-size: 0.8em; color: #aaa;">Cam: ${u.campeaoApostado || 'Não'} | Jogos: ${totalJogos}/72</span><br>
+                        <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
+                            ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
+                        </button>
+                        <button class="btn-excluir" onclick="excluirUsuario('${doc.id}')">🗑️ Excluir</button>
+                    </div>`;
+                });
+                document.getElementById('lista-pagamentos').innerHTML = html;
+            });
+        }
+
+        function confirmarPagamento(id, status) { db.collection("usuarios").doc(id).update({pago: status}); }
+        function excluirUsuario(id) { if(confirm("Apagar usuário?")) db.collection("usuarios").doc(id).delete(); }
+
+        function salvarTudo() {
+            const campeao = document.getElementById('master-champion-select').value;
+            const cel = localStorage.getItem('bolao_user_celular');
+
+            if(!campeao) {
+                alert("Por favor, desça a tela e escolha quem será o Campeão do Mundo!");
+                return;
+            }
+
+            let apostasJogos = {};
+            for (let i = 0; i < gruposCopa.length; i++) {
+                for (let j = 0; j < 6; j++) {
+                    const inputCasa = document.getElementById(`g${i}_${j}_c`);
+                    const inputFora = document.getElementById(`g${i}_${j}_f`);
+                    
+                    if(inputCasa && inputFora) {
+                        const valCasa = inputCasa.value;
+                        const valFora = inputFora.value;
+                        if(valCasa !== "" && valFora !== "") {
+                            apostasJogos[`g${i}_${j}`] = valCasa + "x" + valFora;
+                        }
+                    }
+                }
+            }
+
+            db.collection("usuarios").doc(cel).update({
+                campeaoApostado: campeao,
+                jogos: apostasJogos
+            }).then(() => {
+                document.getElementById('pix-area').style.display = 'block';
+                document.getElementById('pix-area').scrollIntoView({ behavior: 'smooth' });
+            }).catch(erro => {
+                alert("⚠️ Erro ao salvar apostas: " + erro.message);
+            });
+        }
+
+        function sairConta() {
+            localStorage.removeItem('bolao_user_celular');
+            location.reload();
+        }
+
+        window.onload = () => {
+            try {
+                iniciarTabela();
+                const salvo = localStorage.getItem('bolao_user_celular');
+                if(salvo) carregarSessao(salvo);
+            } catch(erro) {
+                alert("Erro ao iniciar a tela. Tente recarregar a página.");
+                console.error(erro);
+            }
+        };
+    </script>
+</body>
+</html>
