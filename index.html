@@ -39,11 +39,18 @@
         
         .btn-salvar-jogo { width: 100%; padding: 8px; border-radius: 5px; border: none; background: var(--primary); color: #111; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-salvar-jogo:active { transform: scale(0.98); }
-        .btn-salvar-jogo:disabled { display: none; } /* Some quando está bloqueado */
-
+        .btn-salvar-jogo:disabled { display: none; }
+        
         #pix-area { display: none; text-align: center; background: #2a2a35; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px dashed var(--primary); color: white; }
         #pix-area img { width: 150px; height: 150px; border-radius: 10px; margin: 10px 0; background: #fff; }
     </style>
+    <script>
+        // DETETIVE DE ERROS: Qualquer travamento vai saltar um alerta na tela
+        window.onerror = function(msg, url, line) {
+            alert("⚠️ Erro detetado na linha " + line + ": " + msg + "\n\nTire print deste erro se o problema persistir.");
+            return false;
+        };
+    </script>
 </head>
 <body>
     <div class="app-container">
@@ -62,9 +69,7 @@
             <div class="card">
                 <h3>⚽ Palpites dos Jogos</h3>
                 <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha o placar e clique no botão verde abaixo de cada jogo para salvar.</p>
-                
-                <div id="jogos-container">
-                    </div>
+                <div id="jogos-container"></div>
             </div>
 
             <div class="card">
@@ -73,7 +78,6 @@
                 <select id="master-champion-select">
                     <option value="">Escolha a seleção campeã...</option>
                 </select>
-                
                 <button class="btn-master" onclick="salvarCampeao()">SALVAR SELEÇÃO CAMPEÃ</button>
             </div>
 
@@ -95,20 +99,21 @@
     </div>
 
     <script>
+        // CONECTA COM O BANCO DE DADOS
         const firebaseConfig = { apiKey: "AIzaSyC0106qe3GnZM6xJyE5OHG-JQsWoWqbHMg", authDomain: "bolao2026-450ff.firebaseapp.com", projectId: "bolao2026-450ff", storageBucket: "bolao2026-450ff.firebasestorage.app", messagingSenderId: "186761975126", appId: "1:186761975126:web:450f60eb0bd1f5e04132f7" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const CELULAR_ADMIN = "75992637960";
 
-        // Mude para "true" para testar os botões agora. Deixe "false" para o modo oficial!
+        // MODO TESTE LIGADO (Mude para false quando for valer dinheiro!)
         const MODO_TESTE = true; 
-
         let todosOsJogosGlobais = [];
 
+        // BASE DE DADOS (Bandeiras problemáticas removidas e simplificadas)
         const gruposCopa = [
             { nome: "Grupo A", times: ["🇲🇽 México", "🇿🇦 África do Sul", "🇰🇷 Coreia do Sul", "🇨🇿 Rep. Tcheca"], datas: ["11/06 16:00", "11/06 23:00", "18/06 13:00", "18/06 22:00", "24/06 22:00", "24/06 22:00"] },
             { nome: "Grupo B", times: ["🇨🇦 Canadá", "🇧🇦 Bósnia", "🇶🇦 Catar", "🇨🇭 Suíça"], datas: ["12/06 16:00", "13/06 16:00", "18/06 16:00", "18/06 19:00", "24/06 16:00", "24/06 16:00"] },
-            { nome: "Grupo C", times: ["🇧🇷 Brasil", "🇲🇦 Marrocos", "🇭🇹 Haiti", "🏴\u200d󠁢󠁳󠁣󠁴󠁿 Escócia"], datas: ["13/06 19:00", "13/06 22:00", "19/06 19:00", "19/06 21:30", "24/06 19:00", "24/06 19:00"] },
+            { nome: "Grupo C", times: ["🇧🇷 Brasil", "🇲🇦 Marrocos", "🇭🇹 Haiti", "🏴 Escócia"], datas: ["13/06 19:00", "13/06 22:00", "19/06 19:00", "19/06 21:30", "24/06 19:00", "24/06 19:00"] },
             { nome: "Grupo D", times: ["🇺🇸 EUA", "🇵🇾 Paraguai", "🇦🇺 Austrália", "🇹🇷 Turquia"], datas: ["12/06 22:00", "14/06 01:00", "19/06 16:00", "19/06 01:00", "25/06 23:00", "25/06 23:00"] },
             { nome: "Grupo E", times: ["🇩🇪 Alemanha", "🇨🇼 Curaçao", "🇨🇮 Costa do Marfim", "🇪🇨 Equador"], datas: ["14/06 14:00", "14/06 20:00", "20/06 17:00", "20/06 21:00", "25/06 16:00", "25/06 16:00"] },
             { nome: "Grupo F", times: ["🇳🇱 Holanda", "🇯🇵 Japão", "🇸🇪 Suécia", "🇹🇳 Tunísia"], datas: ["14/06 17:00", "14/06 23:00", "20/06 14:00", "20/06 01:00", "25/06 20:00", "25/06 20:00"] },
@@ -117,7 +122,7 @@
             { nome: "Grupo I", times: ["🇫🇷 França", "🇸🇳 Senegal", "🇮🇶 Iraque", "🇳🇴 Noruega"], datas: ["16/06 16:00", "16/06 19:00", "22/06 19:00", "22/06 21:00", "26/06 16:00", "26/06 16:00"] },
             { nome: "Grupo J", times: ["🇦🇷 Argentina", "🇩🇿 Argélia", "🇦🇹 Áustria", "🇯🇴 Jordânia"], datas: ["16/06 22:00", "16/06 01:00", "22/06 14:00", "22/06 00:00", "27/06 23:00", "27/06 23:00"] },
             { nome: "Grupo K", times: ["🇵🇹 Portugal", "🇨🇩 RD Congo", "🇺🇿 Uzbequistão", "🇨🇴 Colômbia"], datas: ["17/06 14:00", "17/06 23:00", "23/06 14:00", "23/06 23:00", "27/06 20:30", "27/06 20:30"] },
-            { nome: "Grupo L", times: ["🏴\u200d󠁡󠁩󠁡󠁴\u200d󠁢󠁡󠁲󠁿 Inglaterra", "🇭🇷 Croácia", "🇬🇭 Gana", "🇵🇦 Panamá"], datas: ["17/06 17:00", "17/06 20:00", "23/06 17:00", "23/06 20:00", "27/06 18:00", "27/06 19:00"] }
+            { nome: "Grupo L", times: ["🇬🇧 Inglaterra", "🇭🇷 Croácia", "🇬🇭 Gana", "🇵🇦 Panamá"], datas: ["17/06 17:00", "17/06 20:00", "23/06 17:00", "23/06 20:00", "27/06 18:00", "27/06 19:00"] }
         ];
 
         const confrontos = [[0,1], [2,3], [3,1], [0,2], [1,2], [3,0]];
@@ -251,8 +256,7 @@
 
             db.collection("usuarios").doc(celular).set({
                 nome: document.getElementById('login-nome').value,
-                apelido: document.getElementById('login-apelido').value,
-                pago: false
+                apelido: document.getElementById('login-apelido').value
             }, {merge: true}).then(() => {
                 localStorage.setItem('bolao_user_celular', celular);
                 location.reload();
@@ -277,7 +281,6 @@
                             if(document.getElementById(idJogo + '_c')) document.getElementById(idJogo + '_c').value = partes[0];
                             if(document.getElementById(idJogo + '_f')) document.getElementById(idJogo + '_f').value = partes[1];
                             
-                            // Muda a cor do botão para mostrar que já estava salvo
                             let btnSalvo = document.getElementById('btn_salvar_' + idJogo + '_c');
                             if(btnSalvo) {
                                 btnSalvo.innerText = "✏️ Alterar Placar";
@@ -322,7 +325,6 @@
         function confirmarPagamento(id, status) { db.collection("usuarios").doc(id).update({pago: status}); }
         function excluirUsuario(id) { if(confirm("Apagar usuário?")) db.collection("usuarios").doc(id).delete(); }
 
-        // Nova função para salvar o jogo individualmente
         function salvarJogoUnico(idC, idF) {
             const cel = localStorage.getItem('bolao_user_celular');
             const inputCasa = document.getElementById(idC);
@@ -338,7 +340,6 @@
 
             btn.innerText = "Salvando...";
 
-            // Salva apenas este jogo na conta do usuário usando 'merge: true' para não apagar os outros
             db.collection("usuarios").doc(cel).set({
                 jogos: {
                     [jogoId]: placar
@@ -347,9 +348,7 @@
                 btn.innerText = "✅ Salvo!";
                 btn.style.background = "#444";
                 btn.style.color = "#fff";
-                
-                // Exibe o PIX
-                exibirAreaPix();
+                document.getElementById('pix-area').style.display = 'block';
             }).catch(erro => {
                 alert("⚠️ Erro ao salvar o jogo: " + erro.message);
                 btn.innerText = "✅ Salvar este Placar";
@@ -366,14 +365,10 @@
                 campeaoApostado: campeao
             }).then(() => {
                 alert("Seleção Campeã salva com sucesso!");
-                exibirAreaPix();
+                document.getElementById('pix-area').style.display = 'block';
             }).catch(erro => {
                 alert("⚠️ Erro ao salvar campeão: " + erro.message);
             });
-        }
-
-        function exibirAreaPix() {
-            document.getElementById('pix-area').style.display = 'block';
         }
 
         function sairConta() {
