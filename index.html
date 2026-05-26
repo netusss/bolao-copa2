@@ -67,8 +67,6 @@
                 <h3>⚽ Palpites dos Jogos</h3>
                 <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha os placares e clique no botão de aposta do jogo desejado.</p>
                 <div id="jogos-container"></div>
-                
-                <button class="btn-master" onclick="salvarTodosJogos()">APOSTAR EM TODOS OS PLACARES (R$ 10,00)</button>
             </div>
 
             <div class="card">
@@ -344,57 +342,15 @@
                 btn.innerText = "✏️ Alterar Aposta";
                 btn.style.background = "#444";
                 btn.style.color = "#fff";
-                document.getElementById('pix-area').style.display = 'block';
+                
+                // Exibe a área do PIX e rola automaticamente até ela
+                const pixArea = document.getElementById('pix-area');
+                pixArea.style.display = 'block';
+                pixArea.scrollIntoView({ behavior: 'smooth' });
+                
             }).catch(erro => {
                 alert("⚠️ Erro ao salvar o jogo: " + erro.message);
                 btn.innerText = "⚽ Apostar R$ 10,00";
-            });
-        }
-
-        // Salvar todos os jogos de uma vez
-        function salvarTodosJogos() {
-            const cel = localStorage.getItem('bolao_user_celular');
-            let apostasJogos = {};
-            let temJogo = false;
-
-            todosOsJogosGlobais.forEach(jogo => {
-                const inputCasa = document.getElementById(jogo.idC);
-                const inputFora = document.getElementById(jogo.idF);
-                
-                if(inputCasa && inputFora && inputCasa.value !== "" && inputFora.value !== "") {
-                    apostasJogos[jogo.idC.replace('_c', '')] = inputCasa.value + "x" + inputFora.value;
-                    temJogo = true;
-                }
-            });
-
-            if(!temJogo) return alert("Por favor, preencha o placar de pelo menos um jogo antes de apostar tudo!");
-
-            const btnGeral = document.querySelector('button[onclick="salvarTodosJogos()"]');
-            btnGeral.innerText = "Apostando tudo...";
-
-            db.collection("usuarios").doc(cel).set({
-                jogos: apostasJogos
-            }, {merge: true}).then(() => {
-                btnGeral.innerText = "APOSTAR EM TODOS OS PLACARES (R$ 10,00)";
-                document.getElementById('pix-area').style.display = 'block';
-                document.getElementById('pix-area').scrollIntoView({ behavior: 'smooth' });
-                alert("Todas as suas apostas foram guardadas!");
-                
-                todosOsJogosGlobais.forEach(jogo => {
-                    const inputCasa = document.getElementById(jogo.idC);
-                    const inputFora = document.getElementById(jogo.idF);
-                    if(inputCasa.value !== "" && inputFora.value !== "") {
-                        let btnSalvo = document.getElementById('btn_salvar_' + jogo.idC);
-                        if(btnSalvo) {
-                            btnSalvo.innerText = "✏️ Alterar Aposta";
-                            btnSalvo.style.background = "#444";
-                            btnSalvo.style.color = "#fff";
-                        }
-                    }
-                });
-            }).catch(erro => {
-                alert("⚠️ Erro ao processar apostas: " + erro.message);
-                btnGeral.innerText = "APOSTAR EM TODOS OS PLACARES (R$ 10,00)";
             });
         }
 
@@ -408,7 +364,12 @@
                 campeaoApostado: campeao
             }).then(() => {
                 alert("Seleção Campeã salva com sucesso!");
-                document.getElementById('pix-area').style.display = 'block';
+                
+                // Exibe a área do PIX e rola automaticamente até ela
+                const pixArea = document.getElementById('pix-area');
+                pixArea.style.display = 'block';
+                pixArea.scrollIntoView({ behavior: 'smooth' });
+                
             }).catch(erro => {
                 alert("⚠️ Erro ao salvar campeão: " + erro.message);
             });
