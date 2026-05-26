@@ -257,4 +257,139 @@
                 localStorage.setItem('bolao_user_celular', celular);
                 location.reload();
             }).catch(erro => {
-                alert("⚠️ Erro de conexão com o banco: " + erro.message
+                alert("⚠️ Erro de conexão com o banco: " + erro.message);
+                btn.innerText = "ENTRAR NO BOLÃO";
+            });
+        }
+
+        function carregarSessao(celular) {
+            db.collection("usuarios").doc(celular).get().then(doc => {
+                if(doc.exists) {
+                    const dados = doc.data();
+                    document.querySelector('.player-nickname').innerText = "Olá, " + dados.apelido;
+                    
+                    if(dados.campeaoApostado) document.getElementById('master-champion-select').value = dados.campeaoApostado;
+                    
+                    if(dados.jogos) {
+                        for (let idJogo in dados.jogos) {
+                            let placar = dados.jogos[idJogo];
+                            let partes = placar.split('x');
+                            if(document.getElementById(idJogo + '_c')) document.getElementById(idJogo + '_c').value = partes[0];
+                            if(document.getElementById(idJogo + '_f')) document.getElementById(idJogo + '_f').value = partes[1];
+                            
+                            // Muda a cor do botão para mostrar que já estava salvo
+                            let btnSalvo = document.getElementById('btn_salvar_' + idJogo + '_c');
+                            if(btnSalvo) {
+                                btnSalvo.innerText = "✏️ Alterar Placar";
+                                btnSalvo.style.background = "#444";
+                                btnSalvo.style.color = "#fff";
+                            }
+                        }
+                    }
+
+                    if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
+                        document.getElementById('admin-panel').style.display = 'block';
+                        carregarListaPagamentos();
+                    }
+                    document.getElementById('login-screen').classList.remove('active');
+                    document.getElementById('games-screen').classList.add('active');
+                }
+            }).catch(erro => {
+                alert("⚠️ Erro ao carregar sua conta: " + erro.message);
+            });
+        }
+
+        function carregarListaPagamentos() {
+            db.collection("usuarios").onSnapshot(snapshot => {
+                let html = "";
+                snapshot.forEach(doc => {
+                    const u = doc.data();
+                    let totalJogos = 0;
+                    if(u.jogos) { for(let k in u.jogos) totalJogos++; }
+                    html += `<div class="card" style="margin-bottom: 10px;">
+                        <strong>${u.apelido}</strong> - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}<br>
+                        <span style="font-size: 0.8em; color: #aaa;">Cam: ${u.campeaoApostado || 'Não'} | Jogos: ${totalJogos}/72</span><br>
+                        <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
+                            ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
+                        </button>
+                        <button class="btn-excluir" onclick="excluirUsuario('${doc.id}')">🗑️ Excluir</button>
+                    </div>`;
+                });
+                document.getElementById('lista-pagamentos').innerHTML = html;
+            });
+        }
+
+        function confirmarPagamento(id, status) { db.collection("usuarios").doc(id).update({pago: status}); }
+        function excluirUsuario(id) { if(confirm("Apagar usuário?")) db.collection("usuarios").doc(id).delete(); }
+
+        // Nova função para salvar o jogo individualmente
+        function salvarJogoUnico(idC, idF) {
+            const cel = localStorage.getItem('bolao_user_celular');
+            const inputCasa = document.getElementById(idC);
+            const inputFora = document.getElementById(idF);
+            const btn = document.getElementById('btn_salvar_' + idC);
+
+            if(!inputCasa || !inputFora || inputCasa.value === "" || inputFora.value === "") {
+                return alert("Preencha o placar das duas seleções neste jogo!");
+            }
+
+            const jogoId = idC.replace('_c', '');
+            const placar = inputCasa.value + "x" + inputFora.value;
+
+            btn.innerText = "Salvando...";
+
+            // Salva apenas este jogo na conta do usuário usando 'merge: true' para não apagar os outros
+            db.collection("usuarios").doc(cel).set({
+                jogos: {
+                    [jogoId]: placar
+                }
+            }, {merge: true}).then(() => {
+                btn.innerText = "✅ Salvo!";
+                btn.style.background = "#444";
+                btn.style.color = "#fff";
+                
+                // Exibe o PIX
+                exibirAreaPix();
+            }).catch(erro => {
+                alert("⚠️ Erro ao salvar o jogo: " + erro.message);
+                btn.innerText = "✅ Salvar este Placar";
+            });
+        }
+
+        function salvarCampeao() {
+            const campeao = document.getElementById('master-champion-select').value;
+            const cel = localStorage.getItem('bolao_user_celular');
+
+            if(!campeao) return alert("Por favor, selecione uma seleção para ser a campeã!");
+
+            db.collection("usuarios").doc(cel).update({
+                campeaoApostado: campeao
+            }).then(() => {
+                alert("Seleção Campeã salva com sucesso!");
+                exibirAreaPix();
+            }).catch(erro => {
+                alert("⚠️ Erro ao salvar campeão: " + erro.message);
+            });
+        }
+
+        function exibirAreaPix() {
+            document.getElementById('pix-area').style.display = 'block';
+        }
+
+        function sairConta() {
+            localStorage.removeItem('bolao_user_celular');
+            location.reload();
+        }
+
+        window.onload = () => {
+            try {
+                iniciarTabela();
+                const salvo = localStorage.getItem('bolao_user_celular');
+                if(salvo) carregarSessao(salvo);
+            } catch(erro) {
+                alert("Erro ao iniciar a tela. Tente recarregar a página.");
+            }
+        };
+    </script>
+</body>
+</html>
