@@ -13,27 +13,34 @@
         .screen { display: none; }
         .screen.active { display: block; }
         .card { background: var(--card); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333; }
-        button { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; font-size: 1.1em; cursor: pointer; margin-top: 10px; color: #111; }
-        select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #444; box-sizing: border-box; }
+        
+        button.btn-master { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; font-size: 1.1em; cursor: pointer; margin-top: 10px; color: #111; }
+        select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #111; color: white; border: 1px solid #444; box-sizing: border-box; }
         
         /* Cores para inputs bloqueados */
-        input:disabled { background: #111; color: #555; cursor: not-allowed; }
+        input:disabled { background: #000; color: #555; cursor: not-allowed; border: 1px solid #222; }
         
         .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
-        .btn-pago { background: #0088ff; color: white; margin-top: 5px; font-size: 0.9em; padding: 8px;}
-        .btn-confirmado { background: #444; color: #888; margin-top: 5px; font-size: 0.9em; padding: 8px;}
-        .btn-excluir { background: #aa0000; color: white; margin-top: 5px; font-size: 0.8em; padding: 8px;}
-        .btn-sair { background: #333; color: white; font-size: 0.9em; margin-top: 20px; border: 1px solid #555; }
+        .btn-pago { background: #0088ff; color: white; margin-top: 5px; font-size: 0.9em; padding: 8px; border-radius: 5px; border: none;}
+        .btn-confirmado { background: #444; color: #888; margin-top: 5px; font-size: 0.9em; padding: 8px; border-radius: 5px; border: none;}
+        .btn-excluir { background: #aa0000; color: white; margin-top: 5px; font-size: 0.8em; padding: 8px; border-radius: 5px; border: none;}
+        .btn-sair { background: #333; color: white; font-size: 0.9em; margin-top: 20px; border: 1px solid #555; width: 100%; padding: 12px; border-radius: 8px; cursor: pointer;}
         
-        #jogos-container { max-height: 450px; overflow-y: auto; padding-right: 5px; margin-bottom: 10px; border: 1px solid #333; padding: 10px; border-radius: 8px; background: #1a1a24; }
+        #jogos-container { max-height: 500px; overflow-y: auto; padding-right: 5px; margin-bottom: 10px; border: 1px solid #333; padding: 10px; border-radius: 8px; background: #1a1a24; }
         #jogos-container::-webkit-scrollbar { width: 6px; }
         #jogos-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
         
-        .match-date { text-align: center; font-size: 0.8em; color: #111; background: var(--primary); padding: 3px; border-radius: 4px; margin-top: 15px; margin-bottom: 5px; font-weight: bold; transition: 0.3s; }
-        .match-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; transition: 0.3s; }
+        /* Novo design do card de cada jogo */
+        .match-card { background: #222; border-radius: 8px; border: 1px solid #444; padding: 10px; margin-bottom: 12px; transition: 0.3s; }
+        .match-date { text-align: center; font-size: 0.8em; color: #111; background: var(--primary); padding: 4px; border-radius: 4px; margin-bottom: 8px; font-weight: bold; transition: 0.3s; }
+        .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .match-row span { flex: 1; text-align: center; font-weight: bold; font-size: 0.85em; }
-        .match-row input { width: 45px; text-align: center; margin: 0 5px; font-size: 1.1em; padding: 5px; border-radius: 5px; border: none; background: #111; color: white; }
+        .match-row input { width: 45px; text-align: center; margin: 0 5px; font-size: 1.1em; padding: 5px; border-radius: 5px; border: 1px solid #555; background: #0f0f12; color: white; }
         
+        .btn-salvar-jogo { width: 100%; padding: 8px; border-radius: 5px; border: none; background: var(--primary); color: #111; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-salvar-jogo:active { transform: scale(0.98); }
+        .btn-salvar-jogo:disabled { display: none; } /* Some quando está bloqueado */
+
         #pix-area { display: none; text-align: center; background: #2a2a35; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px dashed var(--primary); color: white; }
         #pix-area img { width: 150px; height: 150px; border-radius: 10px; margin: 10px 0; background: #fff; }
     </style>
@@ -46,7 +53,7 @@
             <input type="text" id="login-nome" placeholder="Seu Nome">
             <input type="tel" id="login-celular" placeholder="Celular (Ex: 75992637960)">
             <input type="text" id="login-apelido" placeholder="Seu Apelido">
-            <button id="btn-entrar" onclick="conectarUsuario()">ENTRAR NO BOLÃO</button>
+            <button class="btn-master" id="btn-entrar" onclick="conectarUsuario()">ENTRAR NO BOLÃO</button>
         </section>
 
         <section id="games-screen" class="screen">
@@ -54,12 +61,10 @@
             
             <div class="card">
                 <h3>⚽ Palpites dos Jogos</h3>
-                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Atenção: A aposta de cada jogo só abre no dia do jogo e fecha 5 min antes de a bola rolar.</p>
+                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha o placar e clique no botão verde abaixo de cada jogo para salvar.</p>
                 
                 <div id="jogos-container">
                     </div>
-                
-                <button onclick="salvarJogos()">SALVAR PALPITES DOS JOGOS (R$ 10,00)</button>
             </div>
 
             <div class="card">
@@ -69,11 +74,11 @@
                     <option value="">Escolha a seleção campeã...</option>
                 </select>
                 
-                <button onclick="salvarCampeao()">SALVAR SELEÇÃO CAMPEÃ (R$ 10,00)</button>
+                <button class="btn-master" onclick="salvarCampeao()">SALVAR SELEÇÃO CAMPEÃ</button>
             </div>
 
             <div id="pix-area" class="card">
-                <h3 style="color: var(--primary); margin: 0;">✅ Palpites Salvos com Sucesso!</h3>
+                <h3 style="color: var(--primary); margin: 0;">✅ Aposta Registrada!</h3>
                 <p>Para validar a sua participação, efetue o pagamento de <strong>R$ 10,00</strong>.</p>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR Code PIX">
                 <p style="font-size: 0.9em; margin-bottom: 5px;">Ou use a Chave PIX Copia e Cola:</p>
@@ -95,7 +100,7 @@
         const db = firebase.firestore();
         const CELULAR_ADMIN = "75992637960";
 
-        // Mude para "true" para testar agora. Deixe "false" para aplicar o bloqueio real!
+        // Mude para "true" para testar os botões agora. Deixe "false" para o modo oficial!
         const MODO_TESTE = true; 
 
         let todosOsJogosGlobais = [];
@@ -163,18 +168,20 @@
                 }
 
                 htmlJogos += `
-                <div class="match-date" id="date_${jogo.idC}" style="margin-top: 10px;">⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}</div>
-                <div class="match-row" id="row_${jogo.idC}">
-                    <span>${jogo.timeC}</span>
-                    <input type="number" id="${jogo.idC}" min="0" placeholder="0">
-                    <span>X</span>
-                    <input type="number" id="${jogo.idF}" min="0" placeholder="0">
-                    <span>${jogo.timeF}</span>
+                <div class="match-card" id="card_${jogo.idC}">
+                    <div class="match-date" id="date_${jogo.idC}">⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}</div>
+                    <div class="match-row">
+                        <span>${jogo.timeC}</span>
+                        <input type="number" id="${jogo.idC}" min="0" placeholder="0">
+                        <span>X</span>
+                        <input type="number" id="${jogo.idF}" min="0" placeholder="0">
+                        <span>${jogo.timeF}</span>
+                    </div>
+                    <button class="btn-salvar-jogo" id="btn_salvar_${jogo.idC}" onclick="salvarJogoUnico('${jogo.idC}', '${jogo.idF}')">✅ Salvar este Placar</button>
                 </div>`;
             });
             container.innerHTML = htmlJogos;
             
-            // Verifica os bloqueios logo que carrega e depois a cada 1 minuto
             verificarBloqueios();
             setInterval(verificarBloqueios, 60000);
         }
@@ -186,45 +193,46 @@
             todosOsJogosGlobais.forEach(jogo => {
                 const inputC = document.getElementById(jogo.idC);
                 const inputF = document.getElementById(jogo.idF);
-                const row = document.getElementById(`row_${jogo.idC}`);
+                const card = document.getElementById(`card_${jogo.idC}`);
                 const dateLabel = document.getElementById(`date_${jogo.idC}`);
+                const btnSalvar = document.getElementById(`btn_salvar_${jogo.idC}`);
                 
                 if(!inputC || !inputF) return;
 
                 if (MODO_TESTE) {
                     inputC.disabled = false; inputF.disabled = false;
-                    row.style.opacity = '1';
+                    if(btnSalvar) btnSalvar.disabled = false;
+                    card.style.opacity = '1';
                     dateLabel.innerHTML = `✅ Modo Teste | ⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}`;
                     dateLabel.style.background = 'var(--primary)';
                     return;
                 }
 
-                // Cálculo das datas
-                const partesData = jogo.data.split(' ')[0].split('/'); // [11, 06]
-                const partesHora = jogo.data.split(' ')[1].split(':'); // [16, 00]
-                const mes = parseInt(partesData[1]) - 1; // Janeiro é 0 no JS
+                const partesData = jogo.data.split(' ')[0].split('/');
+                const partesHora = jogo.data.split(' ')[1].split(':');
+                const mes = parseInt(partesData[1]) - 1; 
                 const dia = parseInt(partesData[0]);
                 
                 const inicioDoDia = new Date(anoCopa, mes, dia, 0, 0, 0);
                 const dataHoraJogo = new Date(anoCopa, mes, dia, parseInt(partesHora[0]), parseInt(partesHora[1]), 0);
-                const tempoLimite = new Date(dataHoraJogo.getTime() - (5 * 60 * 1000)); // 5 min antes
+                const tempoLimite = new Date(dataHoraJogo.getTime() - (5 * 60 * 1000));
 
                 if (agora < inicioDoDia) {
-                    // Jogo é num dia futuro
                     inputC.disabled = true; inputF.disabled = true;
-                    row.style.opacity = '0.5';
+                    if(btnSalvar) btnSalvar.disabled = true;
+                    card.style.opacity = '0.5';
                     dateLabel.innerHTML = `🔒 Abre dia ${jogo.data.split(' ')[0]} | ⏰ ${jogo.data.split(' ')[1]}`;
                     dateLabel.style.background = '#aa0000'; dateLabel.style.color = '#fff';
                 } else if (agora >= tempoLimite) {
-                    // Faltam menos de 5 min ou já começou
                     inputC.disabled = true; inputF.disabled = true;
-                    row.style.opacity = '0.5';
+                    if(btnSalvar) btnSalvar.disabled = true;
+                    card.style.opacity = '0.5';
                     dateLabel.innerHTML = `🚫 Encerrado | ⏰ ${jogo.data.split(' ')[1]}`;
                     dateLabel.style.background = '#444'; dateLabel.style.color = '#aaa';
                 } else {
-                    // Está no dia do jogo e no prazo certo!
                     inputC.disabled = false; inputF.disabled = false;
-                    row.style.opacity = '1';
+                    if(btnSalvar) btnSalvar.disabled = false;
+                    card.style.opacity = '1';
                     dateLabel.innerHTML = `✅ Liberado | ⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}`;
                     dateLabel.style.background = 'var(--primary)'; dateLabel.style.color = '#111';
                 }
@@ -249,124 +257,4 @@
                 localStorage.setItem('bolao_user_celular', celular);
                 location.reload();
             }).catch(erro => {
-                alert("⚠️ Erro de conexão com o banco: " + erro.message);
-                btn.innerText = "ENTRAR NO BOLÃO";
-            });
-        }
-
-        function carregarSessao(celular) {
-            db.collection("usuarios").doc(celular).get().then(doc => {
-                if(doc.exists) {
-                    const dados = doc.data();
-                    document.querySelector('.player-nickname').innerText = "Olá, " + dados.apelido;
-                    
-                    if(dados.campeaoApostado) document.getElementById('master-champion-select').value = dados.campeaoApostado;
-                    
-                    if(dados.jogos) {
-                        for (let idJogo in dados.jogos) {
-                            let placar = dados.jogos[idJogo];
-                            let partes = placar.split('x');
-                            if(document.getElementById(idJogo + '_c')) document.getElementById(idJogo + '_c').value = partes[0];
-                            if(document.getElementById(idJogo + '_f')) document.getElementById(idJogo + '_f').value = partes[1];
-                        }
-                    }
-
-                    if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
-                        document.getElementById('admin-panel').style.display = 'block';
-                        carregarListaPagamentos();
-                    }
-                    document.getElementById('login-screen').classList.remove('active');
-                    document.getElementById('games-screen').classList.add('active');
-                }
-            }).catch(erro => {
-                alert("⚠️ Erro ao carregar sua conta: " + erro.message);
-            });
-        }
-
-        function carregarListaPagamentos() {
-            db.collection("usuarios").onSnapshot(snapshot => {
-                let html = "";
-                snapshot.forEach(doc => {
-                    const u = doc.data();
-                    let totalJogos = 0;
-                    if(u.jogos) { for(let k in u.jogos) totalJogos++; }
-                    html += `<div class="card">
-                        <strong>${u.apelido}</strong> - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}<br>
-                        <span style="font-size: 0.8em; color: #aaa;">Cam: ${u.campeaoApostado || 'Não'} | Jogos: ${totalJogos}/72</span><br>
-                        <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
-                            ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
-                        </button>
-                        <button class="btn-excluir" onclick="excluirUsuario('${doc.id}')">🗑️ Excluir</button>
-                    </div>`;
-                });
-                document.getElementById('lista-pagamentos').innerHTML = html;
-            });
-        }
-
-        function confirmarPagamento(id, status) { db.collection("usuarios").doc(id).update({pago: status}); }
-        function excluirUsuario(id) { if(confirm("Apagar usuário?")) db.collection("usuarios").doc(id).delete(); }
-
-        function salvarJogos() {
-            const cel = localStorage.getItem('bolao_user_celular');
-            let apostasJogos = {};
-            let temJogo = false;
-
-            // Recolhe TODOS os jogos, mesmo os que já estão bloqueados, para não apagar nada do banco
-            todosOsJogosGlobais.forEach(jogo => {
-                const inputCasa = document.getElementById(jogo.idC);
-                const inputFora = document.getElementById(jogo.idF);
-                
-                if(inputCasa && inputFora && inputCasa.value !== "" && inputFora.value !== "") {
-                    apostasJogos[jogo.idC.replace('_c', '')] = inputCasa.value + "x" + inputFora.value;
-                    temJogo = true;
-                }
-            });
-
-            if(!temJogo) return alert("Por favor, preencha o placar de pelo menos um jogo antes de salvar!");
-
-            db.collection("usuarios").doc(cel).update({
-                jogos: apostasJogos
-            }).then(() => {
-                exibirAreaPix();
-            }).catch(erro => {
-                alert("⚠️ Erro ao salvar apostas: " + erro.message);
-            });
-        }
-
-        function salvarCampeao() {
-            const campeao = document.getElementById('master-champion-select').value;
-            const cel = localStorage.getItem('bolao_user_celular');
-
-            if(!campeao) return alert("Por favor, selecione uma seleção para ser a campeã!");
-
-            db.collection("usuarios").doc(cel).update({
-                campeaoApostado: campeao
-            }).then(() => {
-                exibirAreaPix();
-            }).catch(erro => {
-                alert("⚠️ Erro ao salvar campeão: " + erro.message);
-            });
-        }
-
-        function exibirAreaPix() {
-            document.getElementById('pix-area').style.display = 'block';
-            document.getElementById('pix-area').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function sairConta() {
-            localStorage.removeItem('bolao_user_celular');
-            location.reload();
-        }
-
-        window.onload = () => {
-            try {
-                iniciarTabela();
-                const salvo = localStorage.getItem('bolao_user_celular');
-                if(salvo) carregarSessao(salvo);
-            } catch(erro) {
-                alert("Erro ao iniciar a tela. Tente recarregar a página.");
-            }
-        };
-    </script>
-</body>
-</html>
+                alert("⚠️ Erro de conexão com o banco: " + erro.message
