@@ -16,6 +16,9 @@
         button { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; font-size: 1.1em; cursor: pointer; margin-top: 10px; color: #111; }
         select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #444; box-sizing: border-box; }
         
+        /* Cores para inputs bloqueados */
+        input:disabled { background: #111; color: #555; cursor: not-allowed; }
+        
         .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
         .btn-pago { background: #0088ff; color: white; margin-top: 5px; font-size: 0.9em; padding: 8px;}
         .btn-confirmado { background: #444; color: #888; margin-top: 5px; font-size: 0.9em; padding: 8px;}
@@ -26,8 +29,8 @@
         #jogos-container::-webkit-scrollbar { width: 6px; }
         #jogos-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
         
-        .match-date { text-align: center; font-size: 0.8em; color: #111; background: var(--primary); padding: 3px; border-radius: 4px; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
-        .match-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
+        .match-date { text-align: center; font-size: 0.8em; color: #111; background: var(--primary); padding: 3px; border-radius: 4px; margin-top: 15px; margin-bottom: 5px; font-weight: bold; transition: 0.3s; }
+        .match-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; transition: 0.3s; }
         .match-row span { flex: 1; text-align: center; font-weight: bold; font-size: 0.85em; }
         .match-row input { width: 45px; text-align: center; margin: 0 5px; font-size: 1.1em; padding: 5px; border-radius: 5px; border: none; background: #111; color: white; }
         
@@ -51,7 +54,7 @@
             
             <div class="card">
                 <h3>⚽ Palpites dos Jogos</h3>
-                <p style="font-size: 0.8em; color: #aaa; margin-bottom: 10px;">Preencha a tabela ordenada por datas abaixo:</p>
+                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Atenção: A aposta de cada jogo só abre no dia do jogo e fecha 5 min antes de a bola rolar.</p>
                 
                 <div id="jogos-container">
                     </div>
@@ -92,6 +95,11 @@
         const db = firebase.firestore();
         const CELULAR_ADMIN = "75992637960";
 
+        // Mude para "true" para testar agora. Deixe "false" para aplicar o bloqueio real!
+        const MODO_TESTE = false; 
+
+        let todosOsJogosGlobais = [];
+
         const gruposCopa = [
             { nome: "Grupo A", times: ["🇲🇽 México", "🇿🇦 África do Sul", "🇰🇷 Coreia do Sul", "🇨🇿 Rep. Tcheca"], datas: ["11/06 16:00", "11/06 23:00", "18/06 13:00", "18/06 22:00", "24/06 22:00", "24/06 22:00"] },
             { nome: "Grupo B", times: ["🇨🇦 Canadá", "🇧🇦 Bósnia", "🇶🇦 Catar", "🇨🇭 Suíça"], datas: ["12/06 16:00", "13/06 16:00", "18/06 16:00", "18/06 19:00", "24/06 16:00", "24/06 16:00"] },
@@ -112,7 +120,7 @@
         function iniciarTabela() {
             const container = document.getElementById('jogos-container');
             const selectMaster = document.getElementById('master-champion-select');
-            let todosOsJogos = [];
+            todosOsJogosGlobais = [];
 
             gruposCopa.forEach((grupo, i) => {
                 const optGroup = document.createElement('optgroup');
@@ -131,7 +139,7 @@
                     const partesDoisPontos = partesEspaco[1].split(':');
                     const chaveOrdem = parseInt(partesBarra[1]) * 1000000 + parseInt(partesBarra[0]) * 10000 + parseInt(partesDoisPontos[0]) * 100 + parseInt(partesDoisPontos[1]);
 
-                    todosOsJogos.push({
+                    todosOsJogosGlobais.push({
                         idC: `g${i}_${j}_c`,
                         idF: `g${i}_${j}_f`,
                         timeC: grupo.times[comb[0]],
@@ -143,22 +151,20 @@
                 });
             });
 
-            todosOsJogos.sort((a, b) => a.chave - b.chave);
+            todosOsJogosGlobais.sort((a, b) => a.chave - b.chave);
             let htmlJogos = "";
             let dataAtual = "";
 
-            todosOsJogos.forEach(jogo => {
+            todosOsJogosGlobais.forEach(jogo => {
                 const dataSemHora = jogo.data.split(' ')[0];
-                const horaJogo = jogo.data.split(' ')[1];
-
                 if (dataSemHora !== dataAtual) {
                     htmlJogos += `<h4 style="color:var(--primary); margin-top:20px; margin-bottom:5px; border-bottom: 1px solid #444; padding-bottom:5px;">📅 Jogos do dia ${dataSemHora}</h4>`;
                     dataAtual = dataSemHora;
                 }
 
                 htmlJogos += `
-                <div class="match-date" style="margin-top: 10px;">⏰ ${horaJogo} - ${jogo.grupo}</div>
-                <div class="match-row">
+                <div class="match-date" id="date_${jogo.idC}" style="margin-top: 10px;">⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}</div>
+                <div class="match-row" id="row_${jogo.idC}">
                     <span>${jogo.timeC}</span>
                     <input type="number" id="${jogo.idC}" min="0" placeholder="0">
                     <span>X</span>
@@ -167,8 +173,64 @@
                 </div>`;
             });
             container.innerHTML = htmlJogos;
+            
+            // Verifica os bloqueios logo que carrega e depois a cada 1 minuto
+            verificarBloqueios();
+            setInterval(verificarBloqueios, 60000);
         }
         
+        function verificarBloqueios() {
+            const agora = new Date();
+            const anoCopa = 2026;
+
+            todosOsJogosGlobais.forEach(jogo => {
+                const inputC = document.getElementById(jogo.idC);
+                const inputF = document.getElementById(jogo.idF);
+                const row = document.getElementById(`row_${jogo.idC}`);
+                const dateLabel = document.getElementById(`date_${jogo.idC}`);
+                
+                if(!inputC || !inputF) return;
+
+                if (MODO_TESTE) {
+                    inputC.disabled = false; inputF.disabled = false;
+                    row.style.opacity = '1';
+                    dateLabel.innerHTML = `✅ Modo Teste | ⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}`;
+                    dateLabel.style.background = 'var(--primary)';
+                    return;
+                }
+
+                // Cálculo das datas
+                const partesData = jogo.data.split(' ')[0].split('/'); // [11, 06]
+                const partesHora = jogo.data.split(' ')[1].split(':'); // [16, 00]
+                const mes = parseInt(partesData[1]) - 1; // Janeiro é 0 no JS
+                const dia = parseInt(partesData[0]);
+                
+                const inicioDoDia = new Date(anoCopa, mes, dia, 0, 0, 0);
+                const dataHoraJogo = new Date(anoCopa, mes, dia, parseInt(partesHora[0]), parseInt(partesHora[1]), 0);
+                const tempoLimite = new Date(dataHoraJogo.getTime() - (5 * 60 * 1000)); // 5 min antes
+
+                if (agora < inicioDoDia) {
+                    // Jogo é num dia futuro
+                    inputC.disabled = true; inputF.disabled = true;
+                    row.style.opacity = '0.5';
+                    dateLabel.innerHTML = `🔒 Abre dia ${jogo.data.split(' ')[0]} | ⏰ ${jogo.data.split(' ')[1]}`;
+                    dateLabel.style.background = '#aa0000'; dateLabel.style.color = '#fff';
+                } else if (agora >= tempoLimite) {
+                    // Faltam menos de 5 min ou já começou
+                    inputC.disabled = true; inputF.disabled = true;
+                    row.style.opacity = '0.5';
+                    dateLabel.innerHTML = `🚫 Encerrado | ⏰ ${jogo.data.split(' ')[1]}`;
+                    dateLabel.style.background = '#444'; dateLabel.style.color = '#aaa';
+                } else {
+                    // Está no dia do jogo e no prazo certo!
+                    inputC.disabled = false; inputF.disabled = false;
+                    row.style.opacity = '1';
+                    dateLabel.innerHTML = `✅ Liberado | ⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}`;
+                    dateLabel.style.background = 'var(--primary)'; dateLabel.style.color = '#111';
+                }
+            });
+        }
+
         function conectarUsuario() {
             const btn = document.getElementById('btn-entrar');
             btn.innerText = "Conectando, aguarde...";
@@ -249,21 +311,16 @@
             let apostasJogos = {};
             let temJogo = false;
 
-            for (let i = 0; i < gruposCopa.length; i++) {
-                for (let j = 0; j < 6; j++) {
-                    const inputCasa = document.getElementById(`g${i}_${j}_c`);
-                    const inputFora = document.getElementById(`g${i}_${j}_f`);
-                    
-                    if(inputCasa && inputFora) {
-                        const valCasa = inputCasa.value;
-                        const valFora = inputFora.value;
-                        if(valCasa !== "" && valFora !== "") {
-                            apostasJogos[`g${i}_${j}`] = valCasa + "x" + valFora;
-                            temJogo = true;
-                        }
-                    }
+            // Recolhe TODOS os jogos, mesmo os que já estão bloqueados, para não apagar nada do banco
+            todosOsJogosGlobais.forEach(jogo => {
+                const inputCasa = document.getElementById(jogo.idC);
+                const inputFora = document.getElementById(jogo.idF);
+                
+                if(inputCasa && inputFora && inputCasa.value !== "" && inputFora.value !== "") {
+                    apostasJogos[jogo.idC.replace('_c', '')] = inputCasa.value + "x" + inputFora.value;
+                    temJogo = true;
                 }
-            }
+            });
 
             if(!temJogo) return alert("Por favor, preencha o placar de pelo menos um jogo antes de salvar!");
 
