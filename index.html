@@ -17,7 +17,6 @@
         button.btn-master { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; font-size: 1.1em; cursor: pointer; margin-top: 10px; color: #111; }
         select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #111; color: white; border: 1px solid #444; box-sizing: border-box; }
         
-        /* Cores para inputs bloqueados */
         input:disabled { background: #000; color: #555; cursor: not-allowed; border: 1px solid #222; }
         
         .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
@@ -30,7 +29,6 @@
         #jogos-container::-webkit-scrollbar { width: 6px; }
         #jogos-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
         
-        /* Novo design do card de cada jogo */
         .match-card { background: #222; border-radius: 8px; border: 1px solid #444; padding: 10px; margin-bottom: 12px; transition: 0.3s; }
         .match-date { text-align: center; font-size: 0.8em; color: #111; background: var(--primary); padding: 4px; border-radius: 4px; margin-bottom: 8px; font-weight: bold; transition: 0.3s; }
         .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -45,9 +43,8 @@
         #pix-area img { width: 150px; height: 150px; border-radius: 10px; margin: 10px 0; background: #fff; }
     </style>
     <script>
-        // DETETIVE DE ERROS: Qualquer travamento vai saltar um alerta na tela
         window.onerror = function(msg, url, line) {
-            alert("⚠️ Erro detetado na linha " + line + ": " + msg + "\n\nTire print deste erro se o problema persistir.");
+            alert("⚠️ Erro detetado na linha " + line + ": " + msg);
             return false;
         };
     </script>
@@ -68,8 +65,10 @@
             
             <div class="card">
                 <h3>⚽ Palpites dos Jogos</h3>
-                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha o placar e clique no botão verde abaixo de cada jogo para salvar.</p>
+                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha os placares e clique no botão verde abaixo para salvar tudo de uma vez.</p>
                 <div id="jogos-container"></div>
+                
+                <button class="btn-master" onclick="salvarTodosJogos()">SALVAR TODOS OS PLACARES (R$ 10,00)</button>
             </div>
 
             <div class="card">
@@ -99,17 +98,15 @@
     </div>
 
     <script>
-        // CONECTA COM O BANCO DE DADOS
         const firebaseConfig = { apiKey: "AIzaSyC0106qe3GnZM6xJyE5OHG-JQsWoWqbHMg", authDomain: "bolao2026-450ff.firebaseapp.com", projectId: "bolao2026-450ff", storageBucket: "bolao2026-450ff.firebasestorage.app", messagingSenderId: "186761975126", appId: "1:186761975126:web:450f60eb0bd1f5e04132f7" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const CELULAR_ADMIN = "75992637960";
 
-        // MODO TESTE LIGADO (Mude para false quando for valer dinheiro!)
+        // MODO TESTE (Mude para false quando for valer!)
         const MODO_TESTE = true; 
         let todosOsJogosGlobais = [];
 
-        // BASE DE DADOS (Bandeiras problemáticas removidas e simplificadas)
         const gruposCopa = [
             { nome: "Grupo A", times: ["🇲🇽 México", "🇿🇦 África do Sul", "🇰🇷 Coreia do Sul", "🇨🇿 Rep. Tcheca"], datas: ["11/06 16:00", "11/06 23:00", "18/06 13:00", "18/06 22:00", "24/06 22:00", "24/06 22:00"] },
             { nome: "Grupo B", times: ["🇨🇦 Canadá", "🇧🇦 Bósnia", "🇶🇦 Catar", "🇨🇭 Suíça"], datas: ["12/06 16:00", "13/06 16:00", "18/06 16:00", "18/06 19:00", "24/06 16:00", "24/06 16:00"] },
@@ -182,7 +179,7 @@
                         <input type="number" id="${jogo.idF}" min="0" placeholder="0">
                         <span>${jogo.timeF}</span>
                     </div>
-                    <button class="btn-salvar-jogo" id="btn_salvar_${jogo.idC}" onclick="salvarJogoUnico('${jogo.idC}', '${jogo.idF}')">✅ Salvar este Placar</button>
+                    <button class="btn-salvar-jogo" id="btn_salvar_${jogo.idC}" onclick="salvarJogoUnico('${jogo.idC}', '${jogo.idF}')">✅ Salvar Placar</button>
                 </div>`;
             });
             container.innerHTML = htmlJogos;
@@ -325,6 +322,7 @@
         function confirmarPagamento(id, status) { db.collection("usuarios").doc(id).update({pago: status}); }
         function excluirUsuario(id) { if(confirm("Apagar usuário?")) db.collection("usuarios").doc(id).delete(); }
 
+        // Salvar um jogo de cada vez
         function salvarJogoUnico(idC, idF) {
             const cel = localStorage.getItem('bolao_user_celular');
             const inputCasa = document.getElementById(idC);
@@ -341,17 +339,63 @@
             btn.innerText = "Salvando...";
 
             db.collection("usuarios").doc(cel).set({
-                jogos: {
-                    [jogoId]: placar
-                }
+                jogos: { [jogoId]: placar }
             }, {merge: true}).then(() => {
-                btn.innerText = "✅ Salvo!";
+                btn.innerText = "✏️ Alterar Placar";
                 btn.style.background = "#444";
                 btn.style.color = "#fff";
                 document.getElementById('pix-area').style.display = 'block';
             }).catch(erro => {
                 alert("⚠️ Erro ao salvar o jogo: " + erro.message);
-                btn.innerText = "✅ Salvar este Placar";
+                btn.innerText = "✅ Salvar Placar";
+            });
+        }
+
+        // Salvar todos os jogos de uma vez
+        function salvarTodosJogos() {
+            const cel = localStorage.getItem('bolao_user_celular');
+            let apostasJogos = {};
+            let temJogo = false;
+
+            todosOsJogosGlobais.forEach(jogo => {
+                const inputCasa = document.getElementById(jogo.idC);
+                const inputFora = document.getElementById(jogo.idF);
+                
+                if(inputCasa && inputFora && inputCasa.value !== "" && inputFora.value !== "") {
+                    apostasJogos[jogo.idC.replace('_c', '')] = inputCasa.value + "x" + inputFora.value;
+                    temJogo = true;
+                }
+            });
+
+            if(!temJogo) return alert("Por favor, preencha o placar de pelo menos um jogo antes de salvar tudo!");
+
+            const btnGeral = document.querySelector('button[onclick="salvarTodosJogos()"]');
+            btnGeral.innerText = "Salvando...";
+
+            db.collection("usuarios").doc(cel).set({
+                jogos: apostasJogos
+            }, {merge: true}).then(() => {
+                btnGeral.innerText = "SALVAR TODOS OS PLACARES (R$ 10,00)";
+                document.getElementById('pix-area').style.display = 'block';
+                document.getElementById('pix-area').scrollIntoView({ behavior: 'smooth' });
+                alert("Todos os seus placares foram salvos!");
+                
+                // Muda a cor dos botões menores que foram salvos
+                todosOsJogosGlobais.forEach(jogo => {
+                    const inputCasa = document.getElementById(jogo.idC);
+                    const inputFora = document.getElementById(jogo.idF);
+                    if(inputCasa.value !== "" && inputFora.value !== "") {
+                        let btnSalvo = document.getElementById('btn_salvar_' + jogo.idC);
+                        if(btnSalvo) {
+                            btnSalvo.innerText = "✏️ Alterar Placar";
+                            btnSalvo.style.background = "#444";
+                            btnSalvo.style.color = "#fff";
+                        }
+                    }
+                });
+            }).catch(erro => {
+                alert("⚠️ Erro ao salvar apostas: " + erro.message);
+                btnGeral.innerText = "SALVAR TODOS OS PLACARES (R$ 10,00)";
             });
         }
 
