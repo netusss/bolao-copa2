@@ -21,7 +21,7 @@
         .btn-excluir { background: #aa0000; color: white; margin-top: 5px; font-size: 0.8em; }
         
         /* Estilos dos placares e datas */
-        .match-date { text-align: center; font-size: 0.85em; color: #00ff87; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
+        .match-date { text-align: center; font-size: 0.85em; color: #111; background: var(--primary); padding: 4px; border-radius: 4px; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
         .match-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
         .match-row span { flex: 1; text-align: center; font-weight: bold; font-size: 0.9em; }
         .match-row input { width: 45px; text-align: center; margin: 0 5px; font-size: 1.2em; padding: 5px; border-radius: 5px; border: none; background: #111; color: white; }
@@ -43,34 +43,34 @@
             <h2 class="player-nickname">Bem-vindo</h2>
             
             <div class="card">
-                <h3>⚽ Jogos da 1ª Rodada</h3>
+                <h3>⚽ Jogos do Brasil (1ª Rodada)</h3>
                 <p style="font-size: 0.8em; color: #aaa;">Preencha os seus placares abaixo:</p>
                 
-                <div class="match-date">📅 11 de Junho (Quinta) - 16:00</div>
+                <div class="match-date">📅 13 de Junho (Sábado) - 19:00</div>
                 <div class="match-row">
-                    <span>🇲🇽 México</span>
+                    <span>🇧🇷 Brasil</span>
                     <input type="number" id="j1-casa" min="0" placeholder="0">
                     <span>X</span>
                     <input type="number" id="j1-fora" min="0" placeholder="0">
-                    <span>🇵🇱 Polônia</span>
+                    <span>🇲🇦 Marrocos</span>
                 </div>
 
-                <div class="match-date">📅 15 de Junho (Segunda) - 16:00</div>
+                <div class="match-date">📅 19 de Junho (Sexta) - 21:30</div>
                 <div class="match-row">
                     <span>🇧🇷 Brasil</span>
                     <input type="number" id="j2-casa" min="0" placeholder="0">
                     <span>X</span>
                     <input type="number" id="j2-fora" min="0" placeholder="0">
-                    <span>🇨🇭 Suíça</span>
+                    <span>🇭🇹 Haiti</span>
                 </div>
 
-                <div class="match-date">📅 16 de Junho (Terça) - 13:00</div>
+                <div class="match-date">📅 24 de Junho (Quarta) - 19:00</div>
                 <div class="match-row">
-                    <span>🇦🇷 Argentina</span>
+                    <span>🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escócia</span>
                     <input type="number" id="j3-casa" min="0" placeholder="0">
                     <span>X</span>
                     <input type="number" id="j3-fora" min="0" placeholder="0">
-                    <span>🇺🇾 Uruguai</span>
+                    <span>🇧🇷 Brasil</span>
                 </div>
             </div>
 
@@ -80,6 +80,7 @@
                     <option value="">Escolha uma das seleções...</option>
                     <optgroup label="América do Sul"><option value="Brasil">Brasil</option><option value="Argentina">Argentina</option><option value="Uruguai">Uruguai</option><option value="Colômbia">Colômbia</option></optgroup>
                     <optgroup label="Europa"><option value="França">França</option><option value="Inglaterra">Inglaterra</option><option value="Alemanha">Alemanha</option><option value="Espanha">Espanha</option><option value="Portugal">Portugal</option></optgroup>
+                    <optgroup label="América do Norte/Central"><option value="EUA">EUA</option><option value="México">México</option><option value="Canadá">Canadá</option></optgroup>
                 </select>
                 
                 <button onclick="salvarTudo()">SALVAR APOSTAS (R$ 10)</button>
@@ -129,7 +130,6 @@
                     
                     if(dados.campeaoApostado) document.getElementById('master-champion-select').value = dados.campeaoApostado;
                     
-                    // Carrega os 3 jogos
                     if(dados.jogo1) { document.getElementById('j1-casa').value = dados.jogo1.split('x')[0]; document.getElementById('j1-fora').value = dados.jogo1.split('x')[1]; }
                     if(dados.jogo2) { document.getElementById('j2-casa').value = dados.jogo2.split('x')[0]; document.getElementById('j2-fora').value = dados.jogo2.split('x')[1]; }
                     if(dados.jogo3) { document.getElementById('j3-casa').value = dados.jogo3.split('x')[0]; document.getElementById('j3-fora').value = dados.jogo3.split('x')[1]; }
