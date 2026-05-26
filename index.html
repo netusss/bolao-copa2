@@ -40,9 +40,8 @@
         .btn-salvar-jogo:disabled { display: none; }
         
         #pix-area { display: none; text-align: center; background: #2a2a35; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px dashed var(--primary); color: white; }
-        #pix-area img { width: 150px; height: 150px; border-radius: 10px; margin: 10px 0; background: #fff; display: none; /* Escondi a imagem do QR Code para não ficar vazio, já que usaremos só a chave */ }
+        #pix-area img { width: 150px; height: 150px; border-radius: 10px; margin: 10px 0; background: #fff; display: none; }
         
-        /* Layout para o botão de copiar PIX */
         .pix-container { display: flex; gap: 8px; margin-top: 10px; align-items: center; justify-content: center; }
         .btn-copiar { background: var(--primary); color: #111; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
@@ -109,8 +108,9 @@
         const db = firebase.firestore();
         const CELULAR_ADMIN = "75992637960";
 
-        // MODO TESTE (Deixe true para testar livremente, mude para false no oficial)
-        const MODO_TESTE = true; 
+        // MODO TESTE DESATIVADO - Bloqueios de tempo reais estão ativos!
+        const MODO_TESTE = false; 
+        
         let todosOsJogosGlobais = [];
 
         const gruposCopa = [
@@ -328,7 +328,6 @@
         function confirmarPagamento(id, status) { db.collection("usuarios").doc(id).update({pago: status}); }
         function excluirUsuario(id) { if(confirm("Apagar usuário?")) db.collection("usuarios").doc(id).delete(); }
 
-        // Salvar um jogo de cada vez
         function salvarJogoUnico(idC, idF) {
             const cel = localStorage.getItem('bolao_user_celular');
             const inputCasa = document.getElementById(idC);
@@ -351,7 +350,6 @@
                 btn.style.background = "#444";
                 btn.style.color = "#fff";
                 
-                // Exibe a área do PIX e rola automaticamente até ela
                 const pixArea = document.getElementById('pix-area');
                 pixArea.style.display = 'block';
                 pixArea.scrollIntoView({ behavior: 'smooth' });
@@ -373,7 +371,6 @@
             }).then(() => {
                 alert("Seleção Campeã salva com sucesso!");
                 
-                // Exibe a área do PIX e rola automaticamente até ela
                 const pixArea = document.getElementById('pix-area');
                 pixArea.style.display = 'block';
                 pixArea.scrollIntoView({ behavior: 'smooth' });
@@ -383,11 +380,10 @@
             });
         }
 
-        // Função do Botão de Copiar PIX
         function copiarPix() {
             const chaveInput = document.getElementById("chave-pix");
             chaveInput.select();
-            chaveInput.setSelectionRange(0, 99999); // Para dispositivos móveis
+            chaveInput.setSelectionRange(0, 99999); 
             navigator.clipboard.writeText(chaveInput.value).then(() => {
                 alert("Chave PIX copiada com sucesso: " + chaveInput.value);
             }).catch(err => {
