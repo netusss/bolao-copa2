@@ -13,18 +13,24 @@
         .screen { display: none; }
         .screen.active { display: block; }
         .card { background: var(--card); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; }
-        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; font-size: 1.1em; cursor: pointer; margin-top: 10px; }
         select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #444; }
-        .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
-        .btn-pago { background: #0088ff; color: white; margin-top: 5px; }
-        .btn-confirmado { background: #444; color: #888; margin-top: 5px; }
-        .btn-excluir { background: #aa0000; color: white; margin-top: 5px; font-size: 0.8em; }
         
-        /* Estilos dos placares e datas */
-        .match-date { text-align: center; font-size: 0.85em; color: #111; background: var(--primary); padding: 4px; border-radius: 4px; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
+        .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
+        .btn-pago { background: #0088ff; color: white; margin-top: 5px; font-size: 0.9em; padding: 8px;}
+        .btn-confirmado { background: #444; color: #888; margin-top: 5px; font-size: 0.9em; padding: 8px;}
+        .btn-excluir { background: #aa0000; color: white; margin-top: 5px; font-size: 0.8em; padding: 8px;}
+        
+        /* Caixinha de jogos com rolagem */
+        #jogos-container { max-height: 450px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; border: 1px solid #333; padding: 10px; border-radius: 8px; background: #1a1a24; }
+        #jogos-container::-webkit-scrollbar { width: 6px; }
+        #jogos-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        
+        .match-date { text-align: center; font-size: 0.8em; color: #111; background: var(--primary); padding: 3px; border-radius: 4px; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
         .match-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
-        .match-row span { flex: 1; text-align: center; font-weight: bold; font-size: 0.9em; }
-        .match-row input { width: 45px; text-align: center; margin: 0 5px; font-size: 1.2em; padding: 5px; border-radius: 5px; border: none; background: #111; color: white; }
+        .match-row span { flex: 1; text-align: center; font-weight: bold; font-size: 0.85em; }
+        .match-row input { width: 45px; text-align: center; margin: 0 5px; font-size: 1.1em; padding: 5px; border-radius: 5px; border: none; background: #111; color: white; }
+        
         #pix-area { display: none; text-align: center; background: #2a2a35; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px dashed var(--primary); }
         #pix-area img { width: 150px; height: 150px; border-radius: 10px; margin: 10px 0; background: #fff; }
     </style>
@@ -32,58 +38,33 @@
 <body>
     <div class="app-container">
         <section id="login-screen" class="screen active">
-            <h1>Bolão Resenha 🏆</h1>
-            <input type="text" id="login-nome" placeholder="Nome">
+            <h1 style="text-align: center; color: var(--primary);">Bolão Resenha 🏆</h1>
+            <p style="text-align: center; color: #aaa; margin-bottom: 20px;">Aposte em todos os 72 jogos da fase de grupos!</p>
+            <input type="text" id="login-nome" placeholder="Seu Nome">
             <input type="tel" id="login-celular" placeholder="Celular (Ex: 75992637960)">
-            <input type="text" id="login-apelido" placeholder="Apelido">
-            <button onclick="conectarUsuario()">ENTRAR</button>
+            <input type="text" id="login-apelido" placeholder="Seu Apelido">
+            <button onclick="conectarUsuario()">ENTRAR NO BOLÃO</button>
         </section>
 
         <section id="games-screen" class="screen">
-            <h2 class="player-nickname">Bem-vindo</h2>
+            <h2 class="player-nickname" style="color: var(--primary);">Bem-vindo</h2>
             
             <div class="card">
-                <h3>⚽ Jogos do Brasil (1ª Rodada)</h3>
-                <p style="font-size: 0.8em; color: #aaa;">Preencha os seus placares abaixo:</p>
+                <h3>⚽ Fase de Grupos (48 Seleções)</h3>
+                <p style="font-size: 0.8em; color: #aaa;">Preencha os placares. (Deslize para baixo para ver todos os grupos).</p>
                 
-                <div class="match-date">📅 13 de Junho (Sábado) - 19:00</div>
-                <div class="match-row">
-                    <span>🇧🇷 Brasil</span>
-                    <input type="number" id="j1-casa" min="0" placeholder="0">
-                    <span>X</span>
-                    <input type="number" id="j1-fora" min="0" placeholder="0">
-                    <span>🇲🇦 Marrocos</span>
-                </div>
-
-                <div class="match-date">📅 19 de Junho (Sexta) - 21:30</div>
-                <div class="match-row">
-                    <span>🇧🇷 Brasil</span>
-                    <input type="number" id="j2-casa" min="0" placeholder="0">
-                    <span>X</span>
-                    <input type="number" id="j2-fora" min="0" placeholder="0">
-                    <span>🇭🇹 Haiti</span>
-                </div>
-
-                <div class="match-date">📅 24 de Junho (Quarta) - 19:00</div>
-                <div class="match-row">
-                    <span>🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escócia</span>
-                    <input type="number" id="j3-casa" min="0" placeholder="0">
-                    <span>X</span>
-                    <input type="number" id="j3-fora" min="0" placeholder="0">
-                    <span>🇧🇷 Brasil</span>
-                </div>
+                <div id="jogos-container">
+                    </div>
             </div>
 
             <div class="card">
-                <h3>🏆 Aposta Master (Campeão)</h3>
+                <h3>🏆 Aposta Master</h3>
+                <p style="font-size: 0.8em; color: #aaa;">Quem será o Campeão do Mundo?</p>
                 <select id="master-champion-select">
-                    <option value="">Escolha uma das seleções...</option>
-                    <optgroup label="América do Sul"><option value="Brasil">Brasil</option><option value="Argentina">Argentina</option><option value="Uruguai">Uruguai</option><option value="Colômbia">Colômbia</option></optgroup>
-                    <optgroup label="Europa"><option value="França">França</option><option value="Inglaterra">Inglaterra</option><option value="Alemanha">Alemanha</option><option value="Espanha">Espanha</option><option value="Portugal">Portugal</option></optgroup>
-                    <optgroup label="América do Norte/Central"><option value="EUA">EUA</option><option value="México">México</option><option value="Canadá">Canadá</option></optgroup>
-                </select>
+                    <option value="">Escolha a seleção campeã...</option>
+                    </select>
                 
-                <button onclick="salvarTudo()">SALVAR APOSTAS (R$ 10)</button>
+                <button onclick="salvarTudo()">SALVAR APOSTAS (R$ 10,00)</button>
 
                 <div id="pix-area">
                     <h3 style="color: var(--primary); margin: 0;">✅ Palpites Salvos!</h3>
@@ -97,7 +78,7 @@
             </div>
             
             <div id="admin-panel" class="admin-panel">
-                <h3 style="color:red">🛠️ CONTROLE DE PAGAMENTOS</h3>
+                <h3 style="color:red">🛠️ PAINEL DE CONTROLE</h3>
                 <div id="lista-pagamentos"></div>
             </div>
         </section>
@@ -109,89 +90,12 @@
         const db = firebase.firestore();
         const CELULAR_ADMIN = "75992637960";
 
-        function conectarUsuario() {
-            const celular = document.getElementById('login-celular').value.trim();
-            if(!celular) return alert("Preencha o celular!");
-            db.collection("usuarios").doc(celular).set({
-                nome: document.getElementById('login-nome').value,
-                apelido: document.getElementById('login-apelido').value,
-                pago: false
-            }, {merge: true}).then(() => {
-                localStorage.setItem('bolao_user_celular', celular);
-                location.reload();
-            });
-        }
-
-        function carregarSessao(celular) {
-            db.collection("usuarios").doc(celular).get().then(doc => {
-                if(doc.exists) {
-                    const dados = doc.data();
-                    document.querySelector('.player-nickname').innerText = "Olá, " + dados.apelido;
-                    
-                    if(dados.campeaoApostado) document.getElementById('master-champion-select').value = dados.campeaoApostado;
-                    
-                    if(dados.jogo1) { document.getElementById('j1-casa').value = dados.jogo1.split('x')[0]; document.getElementById('j1-fora').value = dados.jogo1.split('x')[1]; }
-                    if(dados.jogo2) { document.getElementById('j2-casa').value = dados.jogo2.split('x')[0]; document.getElementById('j2-fora').value = dados.jogo2.split('x')[1]; }
-                    if(dados.jogo3) { document.getElementById('j3-casa').value = dados.jogo3.split('x')[0]; document.getElementById('j3-fora').value = dados.jogo3.split('x')[1]; }
-
-                    if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
-                        document.getElementById('admin-panel').style.display = 'block';
-                        carregarListaPagamentos();
-                    }
-                    document.getElementById('login-screen').classList.remove('active');
-                    document.getElementById('games-screen').classList.add('active');
-                }
-            });
-        }
-
-        function carregarListaPagamentos() {
-            db.collection("usuarios").onSnapshot(snapshot => {
-                let html = "";
-                snapshot.forEach(doc => {
-                    const u = doc.data();
-                    html += `<div class="card">
-                        <strong>${u.apelido}</strong> - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}<br>
-                        <span style="font-size: 0.75em; color: #aaa;">Cam: ${u.campeaoApostado || '-'} | J1: ${u.jogo1 || '-'} | J2: ${u.jogo2 || '-'} | J3: ${u.jogo3 || '-'}</span><br>
-                        <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
-                            ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
-                        </button>
-                        <button class="btn-excluir" onclick="excluirUsuario('${doc.id}')">🗑️ Excluir</button>
-                    </div>`;
-                });
-                document.getElementById('lista-pagamentos').innerHTML = html;
-            });
-        }
-
-        function confirmarPagamento(id, status) { db.collection("usuarios").doc(id).update({pago: status}); }
-        function excluirUsuario(id) { if(confirm("Apagar usuário?")) db.collection("usuarios").doc(id).delete(); }
-
-        function salvarTudo() {
-            const campeao = document.getElementById('master-champion-select').value;
-            const j1c = document.getElementById('j1-casa').value; const j1f = document.getElementById('j1-fora').value;
-            const j2c = document.getElementById('j2-casa').value; const j2f = document.getElementById('j2-fora').value;
-            const j3c = document.getElementById('j3-casa').value; const j3f = document.getElementById('j3-fora').value;
-            const cel = localStorage.getItem('bolao_user_celular');
-
-            if(!campeao || j1c==="" || j1f==="" || j2c==="" || j2f==="" || j3c==="" || j3f==="") {
-                alert("Por favor, preencha todos os placares e escolha o campeão.");
-                return;
-            }
-
-            db.collection("usuarios").doc(cel).update({
-                campeaoApostado: campeao,
-                jogo1: j1c + "x" + j1f,
-                jogo2: j2c + "x" + j2f,
-                jogo3: j3c + "x" + j3f
-            }).then(() => {
-                document.getElementById('pix-area').style.display = 'block';
-                document.getElementById('pix-area').scrollIntoView({ behavior: 'smooth' });
-            });
-        }
-
-        window.onload = () => {
-            const salvo = localStorage.getItem('bolao_user_celular');
-            if(salvo) carregarSessao(salvo);
-        };
-    </script>
-</body>
-</html>
+        // BANCO DE DADOS DA COPA DO MUNDO 2026 (12 Grupos Oficiais)
+        const gruposCopa = [
+            { nome: "Grupo A", times: ["🇲🇽 México", "🇿🇦 África do Sul", "🇰🇷 Coreia do Sul", "🇨🇿 Rep. Tcheca"], datas: ["11/06 16:00", "11/06 23:00", "18/06 13:00", "18/06 22:00", "24/06 22:00", "24/06 22:00"] },
+            { nome: "Grupo B", times: ["🇨🇦 Canadá", "🇧🇦 Bósnia", "🇶🇦 Catar", "🇨🇭 Suíça"], datas: ["12/06 16:00", "13/06 16:00", "18/06 16:00", "18/06 19:00", "24/06 16:00", "24/06 16:00"] },
+            { nome: "Grupo C", times: ["🇧🇷 Brasil", "🇲🇦 Marrocos", "🇭🇹 Haiti", "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escócia"], datas: ["13/06 19:00", "13/06 22:00", "19/06 19:00", "19/06 21:30", "24/06 19:00", "24/06 19:00"] },
+            { nome: "Grupo D", times: ["🇺🇸 EUA", "🇵🇾 Paraguai", "🇦🇺 Austrália", "🇹🇷 Turquia"], datas: ["12/06 22:00", "14/06 01:00", "19/06 16:00", "19/06 01:00", "25/06 23:00", "25/06 23:00"] },
+            { nome: "Grupo E", times: ["🇩🇪 Alemanha", "🇨🇼 Curaçao", "🇨🇮 Costa do Marfim", "🇪🇨 Equador"], datas: ["14/06 14:00", "14/06 20:00", "20/06 17:00", "20/06 21:00", "25/06 16:00", "25/06 16:00"] },
+            { nome: "Grupo F", times: ["🇳🇱 Holanda", "🇯🇵 Japão", "🇸🇪 Suécia", "🇹🇳 Tunísia"], datas: ["14/06 17:00", "14/06 23:00", "20/06 14:00", "20/06 01:00", "25/06 20:00", "25/06 20:00"] },
+            { nome: "Grupo G", times: ["🇧🇪 Bélgica", "🇪🇬 Egito", "🇮🇷 Irã", "🇳🇿 Nova Zelândia"], datas: ["15/06 16:00", "15/06 22:00", "21/06 16:00", "21/06
