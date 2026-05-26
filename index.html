@@ -18,6 +18,8 @@
         .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
         .btn-pago { background: #0088ff; color: white; margin-top: 5px; }
         .btn-confirmado { background: #444; color: #888; margin-top: 5px; }
+        .btn-excluir { background: #aa0000; color: white; margin-top: 5px; }
+        #aposta-atual-texto { color: var(--primary); font-weight: bold; margin-bottom: 10px; display: none; text-align: center; }
     </style>
 </head>
 <body>
@@ -35,13 +37,26 @@
             <div class="card">
                 <h3>🏆 Aposta Master (Campeão)</h3>
                 <p style="font-size: 0.8em; color: #aaa;">Regra: Se mais de uma pessoa acertar, o prêmio será dividido igualmente.</p>
+                
+                <p id="aposta-atual-texto"></p>
+
                 <select id="master-champion-select">
                     <option value="">Escolha uma das 48 seleções...</option>
-                    <optgroup label="América do Sul"><option value="Brasil">Brasil</option><option value="Argentina">Argentina</option><option value="Uruguai">Uruguai</option><option value="Colômbia">Colômbia</option><option value="Equador">Equador</option><option value="Chile">Chile</option><option value="Peru">Peru</option><option value="Paraguai">Paraguai</option><option value="Venezuela">Venezuela</option><option value="Bolívia">Bolívia</option></optgroup>
-                    <optgroup label="Europa"><option value="França">França</option><option value="Inglaterra">Inglaterra</option><option value="Alemanha">Alemanha</option><option value="Espanha">Espanha</option><option value="Portugal">Portugal</option><option value="Itália">Itália</option><option value="Holanda">Holanda</option><option value="Bélgica">Bélgica</option><option value="Suíça">Suíça</option><option value="Croácia">Croácia</option><option value="Dinamarca">Dinamarca</option><option value="Polônia">Polônia</option><option value="Sérvia">Sérvia</option><option value="Ucrânia">Ucrânia</option><option value="Áustria">Áustria</option><option value="Hungria">Hungria</option></optgroup>
-                    <optgroup label="América do Norte/Central"><option value="EUA">EUA</option><option value="México">México</option><option value="Canadá">Canadá</option><option value="Costa Rica">Costa Rica</option><option value="Panamá">Panamá</option><option value="Jamaica">Jamaica</option></optgroup>
-                    <optgroup label="África"><option value="Marrocos">Marrocos</option><option value="Senegal">Senegal</option><option value="Egito">Egito</option><option value="Nigéria">Nigéria</option><option value="Tunísia">Tunísia</option><option value="Camarões">Camarões</option><option value="Gana">Gana</option><option value="Argélia">Argélia</option><option value="Costa do Marfim">Costa do Marfim</option></optgroup>
-                    <optgroup label="Ásia e Oceania"><option value="Japão">Japão</option><option value="Coreia do Sul">Coreia do Sul</option><option value="Arábia Saudita">Arábia Saudita</option><option value="Irã">Irã</option><option value="Austrália">Austrália</option><option value="Catar">Catar</option><option value="Iraque">Iraque</option><option value="Uzbequistão">Uzbequistão</option></optgroup>
+                    <optgroup label="América do Sul">
+                        <option value="Brasil">Brasil</option><option value="Argentina">Argentina</option><option value="Uruguai">Uruguai</option><option value="Colômbia">Colômbia</option><option value="Equador">Equador</option><option value="Chile">Chile</option><option value="Peru">Peru</option><option value="Paraguai">Paraguai</option><option value="Venezuela">Venezuela</option><option value="Bolívia">Bolívia</option>
+                    </optgroup>
+                    <optgroup label="Europa">
+                        <option value="França">França</option><option value="Inglaterra">Inglaterra</option><option value="Alemanha">Alemanha</option><option value="Espanha">Espanha</option><option value="Portugal">Portugal</option><option value="Itália">Itália</option><option value="Holanda">Holanda</option><option value="Bélgica">Bélgica</option><option value="Suíça">Suíça</option><option value="Croácia">Croácia</option><option value="Dinamarca">Dinamarca</option><option value="Polônia">Polônia</option><option value="Sérvia">Sérvia</option><option value="Ucrânia">Ucrânia</option><option value="Áustria">Áustria</option><option value="Hungria">Hungria</option>
+                    </optgroup>
+                    <optgroup label="América do Norte/Central">
+                        <option value="EUA">EUA</option><option value="México">México</option><option value="Canadá">Canadá</option><option value="Costa Rica">Costa Rica</option><option value="Panamá">Panamá</option><option value="Jamaica">Jamaica</option>
+                    </optgroup>
+                    <optgroup label="África">
+                        <option value="Marrocos">Marrocos</option><option value="Senegal">Senegal</option><option value="Egito">Egito</option><option value="Nigéria">Nigéria</option><option value="Tunísia">Tunísia</option><option value="Camarões">Camarões</option><option value="Gana">Gana</option><option value="Argélia">Argélia</option><option value="Costa do Marfim">Costa do Marfim</option>
+                    </optgroup>
+                    <optgroup label="Ásia e Oceania">
+                        <option value="Japão">Japão</option><option value="Coreia do Sul">Coreia do Sul</option><option value="Arábia Saudita">Arábia Saudita</option><option value="Irã">Irã</option><option value="Austrália">Austrália</option><option value="Catar">Catar</option><option value="Iraque">Iraque</option><option value="Uzbequistão">Uzbequistão</option>
+                    </optgroup>
                 </select>
                 <button onclick="apostarCampeao()">Salvar Aposta (R$ 50)</button>
             </div>
@@ -61,6 +76,7 @@
 
         function conectarUsuario() {
             const celular = document.getElementById('login-celular').value.trim();
+            if(!celular) return alert("Preencha o celular!");
             db.collection("usuarios").doc(celular).set({
                 nome: document.getElementById('login-nome').value,
                 apelido: document.getElementById('login-apelido').value,
@@ -74,7 +90,17 @@
         function carregarSessao(celular) {
             db.collection("usuarios").doc(celular).get().then(doc => {
                 if(doc.exists) {
-                    document.querySelector('.player-nickname').innerText = doc.data().apelido;
+                    const dados = doc.data();
+                    document.querySelector('.player-nickname').innerText = "Olá, " + dados.apelido;
+                    
+                    // Mostra a aposta se já existir
+                    if(dados.campeaoApostado) {
+                        const textoAposta = document.getElementById('aposta-atual-texto');
+                        textoAposta.innerText = "✅ Sua aposta atual: " + dados.campeaoApostado;
+                        textoAposta.style.display = "block";
+                        document.getElementById('master-champion-select').value = dados.campeaoApostado;
+                    }
+
                     if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
                         document.getElementById('admin-panel').style.display = 'block';
                         carregarListaPagamentos();
@@ -90,10 +116,14 @@
                 let html = "";
                 snapshot.forEach(doc => {
                     const u = doc.data();
-                    html += `<div class="card">${u.apelido} - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}
+                    const apostaFeita = u.campeaoApostado ? u.campeaoApostado : "Ainda não apostou";
+                    html += `<div class="card">
+                        <strong>${u.apelido}</strong> - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}<br>
+                        <span style="font-size: 0.9em; color: #aaa;">Aposta: ${apostaFeita}</span>
                         <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
                             ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
                         </button>
+                        <button class="btn-excluir" onclick="excluirUsuario('${doc.id}')">🗑️ Excluir Conta</button>
                     </div>`;
                 });
                 document.getElementById('lista-pagamentos').innerHTML = html;
@@ -104,12 +134,24 @@
             db.collection("usuarios").doc(id).update({pago: status});
         }
 
+        function excluirUsuario(id) {
+            if(confirm("Tem certeza que deseja apagar este usuário?")) {
+                db.collection("usuarios").doc(id).delete();
+            }
+        }
+
         function apostarCampeao() {
             const sel = document.getElementById('master-champion-select').value;
             const cel = localStorage.getItem('bolao_user_celular');
             if(sel && cel) {
-                db.collection("usuarios").doc(cel).update({campeaoApostado: sel});
-                alert("Aposta registrada!");
+                db.collection("usuarios").doc(cel).update({campeaoApostado: sel}).then(() => {
+                    const textoAposta = document.getElementById('aposta-atual-texto');
+                    textoAposta.innerText = "✅ Sua aposta atual: " + sel;
+                    textoAposta.style.display = "block";
+                    alert("Aposta salva com sucesso! O prêmio aguarda!");
+                });
+            } else {
+                alert("Por favor, selecione uma equipe.");
             }
         }
 
