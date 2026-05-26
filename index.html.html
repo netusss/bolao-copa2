@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolão Copa 2026 - A Resenha</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root { --bg: #0f0f12; --card: #17171f; --primary: #00ff87; --text: #fff; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        .app-container { width: 100%; max-width: 450px; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .card { background: var(--card); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; cursor: pointer; margin-top: 10px; }
+        select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #444; }
+        .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
+        .btn-pago { background: #0088ff; color: white; margin-top: 5px; }
+        .btn-confirmado { background: #444; color: #888; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <section id="login-screen" class="screen active">
+            <h1>Bolão Resenha 🏆</h1>
+            <input type="text" id="login-nome" placeholder="Nome">
+            <input type="tel" id="login-celular" placeholder="75992637960">
+            <input type="text" id="login-apelido" placeholder="Apelido">
+            <button onclick="conectarUsuario()">ENTRAR</button>
+        </section>
+
+        <section id="games-screen" class="screen">
+            <h2 class="player-nickname">Bem-vindo</h2>
+            <div class="card">
+                <h3>🏆 Aposta Master (Campeão)</h3>
+                <p style="font-size: 0.8em; color: #aaa;">Regra: Se mais de uma pessoa acertar, o prêmio será dividido igualmente.</p>
+                <select id="master-champion-select">
+                    <option value="">Escolha uma das 48 seleções...</option>
+                    <optgroup label="América do Sul"><option value="Brasil">Brasil</option><option value="Argentina">Argentina</option><option value="Uruguai">Uruguai</option><option value="Colômbia">Colômbia</option><option value="Equador">Equador</option><option value="Chile">Chile</option><option value="Peru">Peru</option><option value="Paraguai">Paraguai</option><option value="Venezuela">Venezuela</option><option value="Bolívia">Bolívia</option></optgroup>
+                    <optgroup label="Europa"><option value="França">França</option><option value="Inglaterra">Inglaterra</option><option value="Alemanha">Alemanha</option><option value="Espanha">Espanha</option><option value="Portugal">Portugal</option><option value="Itália">Itália</option><option value="Holanda">Holanda</option><option value="Bélgica">Bélgica</option><option value="Suíça">Suíça</option><option value="Croácia">Croácia</option><option value="Dinamarca">Dinamarca</option><option value="Polônia">Polônia</option><option value="Sérvia">Sérvia</option><option value="Ucrânia">Ucrânia</option><option value="Áustria">Áustria</option><option value="Hungria">Hungria</option></optgroup>
+                    <optgroup label="América do Norte/Central"><option value="EUA">EUA</option><option value="México">México</option><option value="Canadá">Canadá</option><option value="Costa Rica">Costa Rica</option><option value="Panamá">Panamá</option><option value="Jamaica">Jamaica</option></optgroup>
+                    <optgroup label="África"><option value="Marrocos">Marrocos</option><option value="Senegal">Senegal</option><option value="Egito">Egito</option><option value="Nigéria">Nigéria</option><option value="Tunísia">Tunísia</option><option value="Camarões">Camarões</option><option value="Gana">Gana</option><option value="Argélia">Argélia</option><option value="Costa do Marfim">Costa do Marfim</option></optgroup>
+                    <optgroup label="Ásia e Oceania"><option value="Japão">Japão</option><option value="Coreia do Sul">Coreia do Sul</option><option value="Arábia Saudita">Arábia Saudita</option><option value="Irã">Irã</option><option value="Austrália">Austrália</option><option value="Catar">Catar</option><option value="Iraque">Iraque</option><option value="Uzbequistão">Uzbequistão</option></optgroup>
+                </select>
+                <button onclick="apostarCampeao()">Salvar Aposta (R$ 50)</button>
+            </div>
+            
+            <div id="admin-panel" class="admin-panel">
+                <h3 style="color:red">🛠️ CONTROLE DE PAGAMENTOS</h3>
+                <div id="lista-pagamentos"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyC0106qe3GnZM6xJyE5OHG-JQsWoWqbHMg", authDomain: "bolao2026-450ff.firebaseapp.com", projectId: "bolao2026-450ff", storageBucket: "bolao2026-450ff.firebasestorage.app", messagingSenderId: "186761975126", appId: "1:186761975126:web:450f60eb0bd1f5e04132f7" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const CELULAR_ADMIN = "75992637960";
+
+        function conectarUsuario() {
+            const celular = document.getElementById('login-celular').value.trim();
+            db.collection("usuarios").doc(celular).set({
+                nome: document.getElementById('login-nome').value,
+                apelido: document.getElementById('login-apelido').value,
+                pago: false
+            }, {merge: true}).then(() => {
+                localStorage.setItem('bolao_user_celular', celular);
+                location.reload();
+            });
+        }
+
+        function carregarSessao(celular) {
+            db.collection("usuarios").doc(celular).get().then(doc => {
+                if(doc.exists) {
+                    document.querySelector('.player-nickname').innerText = doc.data().apelido;
+                    if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
+                        document.getElementById('admin-panel').style.display = 'block';
+                        carregarListaPagamentos();
+                    }
+                    document.getElementById('login-screen').classList.remove('active');
+                    document.getElementById('games-screen').classList.add('active');
+                }
+            });
+        }
+
+        function carregarListaPagamentos() {
+            db.collection("usuarios").onSnapshot(snapshot => {
+                let html = "";
+                snapshot.forEach(doc => {
+                    const u = doc.data();
+                    html += `<div class="card">${u.apelido} - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}
+                        <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
+                            ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
+                        </button>
+                    </div>`;
+                });
+                document.getElementById('lista-pagamentos').innerHTML = html;
+            });
+        }
+
+        function confirmarPagamento(id, status) {
+            db.collection("usuarios").doc(id).update({pago: status});
+        }
+
+        function apostarCampeao() {
+            const sel = document.getElementById('master-champion-select').value;
+            const cel = localStorage.getItem('bolao_user_celular');
+            if(sel && cel) {
+                db.collection("usuarios").doc(cel).update({campeaoApostado: sel});
+                alert("Aposta registrada!");
+            }
+        }
+
+        window.onload = () => {
+            const salvo = localStorage.getItem('bolao_user_celular');
+            if(salvo) carregarSessao(salvo);
+        };
+    </script>
+</body>
+</html>
