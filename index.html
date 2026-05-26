@@ -40,7 +40,6 @@
         .btn-salvar-jogo:disabled { display: none; }
         
         #pix-area { display: none; text-align: center; background: #2a2a35; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px dashed var(--primary); color: white; }
-        #pix-area img { width: 150px; height: 150px; border-radius: 10px; margin: 10px 0; background: #fff; display: none; }
         
         .pix-container { display: flex; gap: 8px; margin-top: 10px; align-items: center; justify-content: center; }
         .btn-copiar { background: var(--primary); color: #111; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
@@ -94,7 +93,7 @@
             </div>
             
             <div id="admin-panel" class="admin-panel">
-                <h3 style="color:red">🛠️ PAINEL DE CONTROLE</h3>
+                <h3 style="color:red">🛠️ PAINEL DE CONTROLE GERAL</h3>
                 <div id="lista-pagamentos"></div>
             </div>
 
@@ -108,10 +107,10 @@
         const db = firebase.firestore();
         const CELULAR_ADMIN = "75992637960";
 
-        // MODO TESTE DESATIVADO - Bloqueios de tempo reais estão ativos!
         const MODO_TESTE = false; 
         
         let todosOsJogosGlobais = [];
+        let resultadosOficiais = {}; // Nova variável para guardar os placares reais
 
         const gruposCopa = [
             { nome: "Grupo A", times: ["🇲🇽 México", "🇿🇦 África do Sul", "🇰🇷 Coreia do Sul", "🇨🇿 Rep. Tcheca"], datas: ["11/06 16:00", "11/06 23:00", "18/06 13:00", "18/06 22:00", "24/06 22:00", "24/06 22:00"] },
@@ -199,6 +198,11 @@
             const anoCopa = 2026;
 
             todosOsJogosGlobais.forEach(jogo => {
+                const idJogoReal = jogo.idC.replace('_c', '');
+                
+                // Se o jogo já tem resultado oficial lançado pelo Admin, ignora o tempo e mantém bloqueado
+                if(resultadosOficiais[idJogoReal]) return; 
+
                 const inputC = document.getElementById(jogo.idC);
                 const inputF = document.getElementById(jogo.idF);
                 const card = document.getElementById(`card_${jogo.idC}`);
@@ -293,9 +297,14 @@
                         }
                     }
 
+                    // Verifica se a pessoa ganhou ou perdeu com base nos resultados oficiais
+                    verificarAcertos(dados);
+
+                    // Modo Admin
                     if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
                         document.getElementById('admin-panel').style.display = 'block';
                         carregarListaPagamentos();
+                        habilitarBotoesAdminResultados(); // Ativa os botões secretos do Admin
                     }
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('games-screen').classList.add('active');
@@ -304,6 +313,95 @@
                 alert("⚠️ Erro ao carregar sua conta: " + erro.message);
             });
         }
+
+        // FUNÇÃO NOVA: Pinta de Ouro se a pessoa acertou o placar real!
+        function verificarAcertos(dadosUsuario) {
+            todosOsJogosGlobais.forEach(jogo => {
+                let idJogo = jogo.idC.replace('_c', '');
+                let placarOficial = resultadosOficiais[idJogo];
+                let apostaUsuario = dadosUsuario && dadosUsuario.jogos ? dadosUsuario.jogos[idJogo] : null;
+                
+                if (placarOficial) {
+                    let card = document.getElementById('card_' + jogo.idC);
+                    let btn = document.getElementById('btn_salvar_' + jogo.idC);
+                    let inputC = document.getElementById(jogo.idC);
+                    let inputF = document.getElementById(jogo.idF);
+                    
+                    if (btn) btn.style.display = 'none'; // Some com o botão de apostar
+                    if (inputC) inputC.disabled = true; // Bloqueia digitação
+                    if (inputF) inputF.disabled = true;
+                    
+                    let aviso = document.createElement('div');
+                    aviso.style.padding = "10px";
+                    aviso.style.textAlign = "center";
+                    aviso.style.borderRadius = "5px";
+                    aviso.style.marginTop = "10px";
+
+                    if (apostaUsuario === placarOficial) {
+                        // ACERTOU!
+                        card.style.borderColor = "gold";
+                        card.style.boxShadow = "0 0 15px gold";
+                        card.style.opacity = "1";
+                        aviso.style.background = "gold";
+                        aviso.style.color = "#000";
+                        aviso.style.fontWeight = "bold";
+                        aviso.innerHTML = "🏆 VOCÊ ACERTOU O PLACAR E GANHOU!";
+                    } else if (apostaUsuario) {
+                        // ERROU
+                        card.style.opacity = "0.7";
+                        aviso.style.background = "#331111";
+                        aviso.style.color = "#ff6666";
+                        aviso.innerHTML = "❌ Não foi dessa vez. (Real: " + placarOficial + ")";
+                    } else {
+                        // NÃO JOGOU
+                        card.style.opacity = "0.5";
+                        aviso.style.background = "#222";
+                        aviso.style.color = "#aaa";
+                        aviso.innerHTML = "Fim de Jogo. (Resultado Oficial: " + placarOficial + ")";
+                    }
+                    card.appendChild(aviso);
+                }
+            });
+        }
+
+        // FUNÇÃO NOVA ADMIN: Adiciona a caixinha secreta para você lançar o placar oficial
+        function habilitarBotoesAdminResultados() {
+            todosOsJogosGlobais.forEach(jogo => {
+                let idJogo = jogo.idC.replace('_c', '');
+                // Só mostra a caixa do admin se o resultado ainda não foi lançado
+                if (!resultadosOficiais[idJogo]) {
+                    let card = document.getElementById('card_' + jogo.idC);
+                    if(card) {
+                        let div = document.createElement('div');
+                        div.style.marginTop = "15px"; 
+                        div.style.borderTop = "1px dashed red"; 
+                        div.style.paddingTop = "10px";
+                        div.style.textAlign = "center";
+                        div.innerHTML = `
+                            <p style="color:red; font-size:0.85em; margin:0 0 8px 0; font-weight:bold;">👑 ADMIN: Lançar placar REAL (Fim de Jogo)</p>
+                            <input type="text" id="admin_real_${idJogo}" placeholder="Ex: 2x1" style="width:100px; display:inline-block; padding:8px; text-align:center;">
+                            <button onclick="salvarResultadoOficial('${idJogo}')" style="background:red; color:white; font-weight:bold; border:none; padding:10px; border-radius:5px; cursor:pointer;">Lançar Oficial</button>
+                        `;
+                        card.appendChild(div);
+                    }
+                }
+            });
+        }
+
+        // FUNÇÃO NOVA ADMIN: Salva o resultado no banco
+        window.salvarResultadoOficial = function(idJogo) {
+            let val = document.getElementById('admin_real_' + idJogo).value;
+            if(!val || !val.includes('x')) return alert("Por favor, digite o resultado no formato exato: 2x1");
+            
+            if(confirm("Tem a certeza que o jogo terminou " + val + "? Todos os jogadores verão isso agora!")) {
+                db.collection("sistema").doc("resultados").set({
+                    [idJogo]: val
+                }, {merge: true}).then(() => {
+                    alert("✅ Resultado oficial salvo! Os ganhadores já receberam o troféu no ecrã deles.");
+                    location.reload();
+                });
+            }
+        };
 
         function carregarListaPagamentos() {
             db.collection("usuarios").onSnapshot(snapshot => {
@@ -398,9 +496,19 @@
 
         window.onload = () => {
             try {
-                iniciarTabela();
-                const salvo = localStorage.getItem('bolao_user_celular');
-                if(salvo) carregarSessao(salvo);
+                // PRIMEIRO passo de todos: O sistema busca os Resultados Oficiais no banco
+                db.collection("sistema").doc("resultados").get().then(doc => {
+                    if(doc.exists) resultadosOficiais = doc.data();
+                    
+                    iniciarTabela();
+                    const salvo = localStorage.getItem('bolao_user_celular');
+                    if(salvo) carregarSessao(salvo);
+                }).catch(e => {
+                    // Se a internet falhar ao buscar resultados, o site abre normal mesmo assim
+                    iniciarTabela();
+                    const salvo = localStorage.getItem('bolao_user_celular');
+                    if(salvo) carregarSessao(salvo);
+                });
             } catch(erro) {
                 alert("Erro ao iniciar a tela. Tente recarregar a página.");
             }
