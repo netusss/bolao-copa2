@@ -47,12 +47,12 @@
         .btn-salvar-jogo:active { transform: scale(0.98); }
         .btn-salvar-jogo:disabled { display: none; }
         
-        #pix-area { display: none; text-align: center; background: #2a2a35; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px dashed var(--primary); color: white; }
+        /* Ajuste do PIX para combinar com a sua imagem */
+        #pix-area { display: none; text-align: center; background: #17171f; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 2px dashed var(--primary); color: white; }
         .pix-container { display: flex; gap: 8px; margin-top: 10px; align-items: center; justify-content: center; }
         .btn-copiar { background: var(--primary); color: #111; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .label-pequena { font-size: 0.8em; color: #aaa; margin: 10px 0 2px 0; display: block; }
         
-        /* Destaque para jogo do Brasil */
         .match-brasil { border: 1px solid #ffcc00; box-shadow: 0 0 5px rgba(255, 204, 0, 0.2); }
     </style>
     <script>
@@ -79,23 +79,23 @@
                 <select id="master-champion-select">
                     <option value="">Escolha a seleção campeã...</option>
                 </select>
-                <button class="btn-master" onclick="salvarApostaCampeao()">SALVAR CAMPEÃO (R$ 10,00)</button>
+                <button class="btn-master" onclick="salvarApostaCampeao()">SALVAR CAMPEÃO (R$ 20,00)</button>
+            </div>
+
+            <div id="pix-area" class="card">
+                <h3 style="color: var(--primary); margin: 0;">✅ Aposta Registrada!</h3>
+                <p>Para validar a sua participação, efetue o pagamento de <strong>R$ 20,00</strong>.</p>
+                <p style="font-size: 0.9em; margin-bottom: 5px; margin-top: 15px;">Chave PIX (Celular):</p>
+                <div class="pix-container">
+                    <input type="text" value="63652161572" readonly id="chave-pix" style="text-align: center; margin: 0; color: #00ff87; border: 1px solid #00ff87; background: #111; font-weight: bold; font-size: 1.1em; flex: 1;">
+                    <button class="btn-copiar" onclick="copiarPix()">Copiar</button>
+                </div>
             </div>
 
             <div class="card">
                 <h3>⚽ Palpites dos Jogos</h3>
                 <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha os placares e clique no botão de aposta. Jogos do Brasil têm bónus!</p>
                 <div id="jogos-container"></div>
-            </div>
-
-            <div id="pix-area" class="card">
-                <h3 style="color: var(--primary); margin: 0;">✅ Aposta Registrada!</h3>
-                <p>Para validar a sua participação, efetue o pagamento de <strong>R$ 10,00</strong>.</p>
-                <p style="font-size: 0.9em; margin-bottom: 5px; margin-top: 15px;">Chave PIX (Celular):</p>
-                <div class="pix-container">
-                    <input type="text" value="63652161572" readonly id="chave-pix" style="text-align: center; margin: 0; color: #00ff87; border: 1px solid #00ff87; background: #111; font-weight: bold; font-size: 1.1em; flex: 1;">
-                    <button class="btn-copiar" onclick="copiarPix()">Copiar</button>
-                </div>
             </div>
             
             <div id="admin-panel" class="admin-panel">
@@ -134,7 +134,6 @@
 
         const confrontos = [[0,1], [2,3], [3,1], [0,2], [1,2], [3,0]];
 
-        // Variável com a lista oficial de jogadores para reutilizar no código
         const listaJogadoresBrasil = `
             <option value="">Selecione o jogador...</option>
             <optgroup label="Atacantes">
@@ -246,7 +245,7 @@
                         <span>${jogo.timeF}</span>
                     </div>
                     ${htmlGolBrasil}
-                    <button class="btn-salvar-jogo" id="btn_salvar_${jogo.idC}" onclick="salvarJogoUnico('${jogo.idC}', '${jogo.idF}', ${isBrasil})">⚽ Apostar R$ 10,00</button>
+                    <button class="btn-salvar-jogo" id="btn_salvar_${jogo.idC}" onclick="salvarJogoUnico('${jogo.idC}', '${jogo.idF}', ${isBrasil})">⚽ Apostar R$ 20,00</button>
                 </div>`;
             });
             container.innerHTML = htmlJogos;
@@ -559,6 +558,9 @@
                 const pixArea = document.getElementById('pix-area');
                 pixArea.style.display = 'block';
                 pixArea.scrollIntoView({ behavior: 'smooth' });
+            }).catch(erro => {
+                alert("⚠️ Erro ao salvar o jogo: " + erro.message);
+                btn.innerText = "⚽ Apostar R$ 20,00";
             });
         }
 
