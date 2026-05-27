@@ -613,6 +613,24 @@
         }
 
         function sairConta() {
+            function atualizarRanking() {
+            db.collection("usuarios").onSnapshot(snapshot => {
+                let r = [];
+                snapshot.forEach(doc => {
+                    let u = doc.data();
+                    let pts = 0;
+                    if(u.jogos) { for(let id in u.jogos) { if(resultadosOficiais[id] && u.jogos[id] === resultadosOficiais[id]) pts += 3; }}
+                    r.push({ nome: u.apelido || "Anon", pts: pts });
+                });
+                r.sort((a,b) => b.pts - a.pts);
+                let html = '<table style="width:100%">';
+                r.forEach((u, i) => {
+                    let cor = i < 3 ? "#00ff87" : "#aaa";
+                    html += `<tr style="border-bottom:1px solid #333"><td style="color:${cor}">${i+1}º ${u.nome}</td><td style="text-align:right">${u.pts} pts</td></tr>`;
+                });
+                document.getElementById('ranking-container').innerHTML = html + '</table>';
+            });
+        }
             localStorage.removeItem('bolao_user_celular');
             location.reload();
         }
@@ -622,7 +640,10 @@
                 if(doc.exists) resultadosOficiais = doc.data();
                 iniciarTabela();
                 const salvo = localStorage.getItem('bolao_user_celular');
-                if(salvo) carregarSessao(salvo);
+               if(salvo) {
+                    carregarSessao(salvo);
+                    atualizarRanking();
+                }
             }).catch(e => {
                 iniciarTabela();
                 const salvo = localStorage.getItem('bolao_user_celular');
