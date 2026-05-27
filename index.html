@@ -17,7 +17,7 @@
         button.btn-master { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--primary); font-weight: bold; font-size: 1.1em; cursor: pointer; margin-top: 10px; color: #111; }
         select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #111; color: white; border: 1px solid #444; box-sizing: border-box; }
         
-        input:disabled { background: #000; color: #555; cursor: not-allowed; border: 1px solid #222; }
+        input:disabled, select:disabled { background: #000; color: #555; cursor: not-allowed; border: 1px solid #222; }
         
         .admin-panel { display: none; border: 2px solid red; padding: 15px; margin-top: 20px; background: #331111; }
         .btn-pago { background: #0088ff; color: white; margin-top: 5px; font-size: 0.9em; padding: 8px; border-radius: 5px; border: none;}
@@ -40,11 +40,12 @@
         .btn-salvar-jogo:disabled { display: none; }
         
         #pix-area { display: none; text-align: center; background: #2a2a35; padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px dashed var(--primary); color: white; }
-        
         .pix-container { display: flex; gap: 8px; margin-top: 10px; align-items: center; justify-content: center; }
         .btn-copiar { background: var(--primary); color: #111; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
         .label-pequena { font-size: 0.8em; color: #aaa; margin: 10px 0 2px 0; display: block; }
+        
+        /* Destaque para jogo do Brasil */
+        .match-brasil { border: 1px solid #ffcc00; box-shadow: 0 0 5px rgba(255, 204, 0, 0.2); }
     </style>
     <script>
         window.onerror = function(msg, url, line) { alert("⚠️ Erro detetado na linha " + line + ": " + msg); return false; };
@@ -65,60 +66,17 @@
             <h2 class="player-nickname" style="color: var(--primary); text-align: center; margin-bottom: 20px;">Bem-vindo</h2>
             
             <div class="card" style="border-color: var(--primary);">
-                <h3 style="color: var(--primary); margin-top: 0;">👑 Apostas Master</h3>
-                
+                <h3 style="color: var(--primary); margin-top: 0;">👑 Aposta Master</h3>
                 <label class="label-pequena">Quem será o grande Campeão do Mundo?</label>
                 <select id="master-champion-select">
                     <option value="">Escolha a seleção campeã...</option>
                 </select>
-
-                <label class="label-pequena">Quem fará o 1º GOL do Brasil na Copa?</label>
-                <select id="master-primeiro-gol-select">
-                    <option value="">Escolha o jogador...</option>
-                    <optgroup label="Atacantes">
-                        <option value="Endrick">Endrick</option>
-                        <option value="Gabriel Martinelli">Gabriel Martinelli</option>
-                        <option value="Igor Thiago">Igor Thiago</option>
-                        <option value="Luiz Henrique">Luiz Henrique</option>
-                        <option value="Matheus Cunha">Matheus Cunha</option>
-                        <option value="Neymar Júnior">Neymar Júnior</option>
-                        <option value="Raphinha">Raphinha</option>
-                        <option value="Rayan">Rayan</option>
-                        <option value="Vinícius Júnior">Vinícius Júnior</option>
-                    </optgroup>
-                    <optgroup label="Meio-campistas">
-                        <option value="Bruno Guimarães">Bruno Guimarães</option>
-                        <option value="Casemiro">Casemiro</option>
-                        <option value="Danilo (Volante)">Danilo (Volante)</option>
-                        <option value="Fabinho">Fabinho</option>
-                        <option value="Lucas Paquetá">Lucas Paquetá</option>
-                    </optgroup>
-                    <optgroup label="Defensores (Zagueiros e Laterais)">
-                        <option value="Alex Sandro">Alex Sandro</option>
-                        <option value="Bremer">Bremer</option>
-                        <option value="Danilo (Lateral)">Danilo (Lateral)</option>
-                        <option value="Douglas Santos">Douglas Santos</option>
-                        <option value="Gabriel Magalhães">Gabriel Magalhães</option>
-                        <option value="Ibañez">Ibañez</option>
-                        <option value="Léo Pereira">Léo Pereira</option>
-                        <option value="Marquinhos">Marquinhos</option>
-                        <option value="Wesley">Wesley</option>
-                    </optgroup>
-                    <optgroup label="Goleiros (Vai que...)">
-                        <option value="Alisson">Alisson</option>
-                        <option value="Ederson">Ederson</option>
-                        <option value="Weverton">Weverton</option>
-                    </optgroup>
-                    <option value="Gol Contra">Gol Contra (Adversário)</option>
-                    <option value="Outro Jogador">Outro Jogador</option>
-                </select>
-
-                <button class="btn-master" onclick="salvarApostasMaster()">SALVAR APOSTAS MASTER (R$ 10,00)</button>
+                <button class="btn-master" onclick="salvarApostaCampeao()">SALVAR CAMPEÃO (R$ 10,00)</button>
             </div>
 
             <div class="card">
                 <h3>⚽ Palpites dos Jogos</h3>
-                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha os placares e clique no botão de aposta do jogo desejado.</p>
+                <p style="font-size: 0.75em; color: #aaa; margin-bottom: 10px;">Preencha os placares e clique no botão de aposta. Jogos do Brasil têm bónus!</p>
                 <div id="jogos-container"></div>
             </div>
 
@@ -168,6 +126,47 @@
 
         const confrontos = [[0,1], [2,3], [3,1], [0,2], [1,2], [3,0]];
 
+        // Variável com a lista oficial de jogadores para reutilizar no código
+        const listaJogadoresBrasil = `
+            <option value="">Selecione o jogador...</option>
+            <optgroup label="Atacantes">
+                <option value="Endrick">Endrick</option>
+                <option value="Gabriel Martinelli">Gabriel Martinelli</option>
+                <option value="Igor Thiago">Igor Thiago</option>
+                <option value="Luiz Henrique">Luiz Henrique</option>
+                <option value="Matheus Cunha">Matheus Cunha</option>
+                <option value="Neymar Júnior">Neymar Júnior</option>
+                <option value="Raphinha">Raphinha</option>
+                <option value="Rayan">Rayan</option>
+                <option value="Vinícius Júnior">Vinícius Júnior</option>
+            </optgroup>
+            <optgroup label="Meio-campistas">
+                <option value="Bruno Guimarães">Bruno Guimarães</option>
+                <option value="Casemiro">Casemiro</option>
+                <option value="Danilo (Volante)">Danilo (Volante)</option>
+                <option value="Fabinho">Fabinho</option>
+                <option value="Lucas Paquetá">Lucas Paquetá</option>
+            </optgroup>
+            <optgroup label="Defensores">
+                <option value="Alex Sandro">Alex Sandro</option>
+                <option value="Bremer">Bremer</option>
+                <option value="Danilo (Lateral)">Danilo (Lateral)</option>
+                <option value="Douglas Santos">Douglas Santos</option>
+                <option value="Gabriel Magalhães">Gabriel Magalhães</option>
+                <option value="Ibañez">Ibañez</option>
+                <option value="Léo Pereira">Léo Pereira</option>
+                <option value="Marquinhos">Marquinhos</option>
+                <option value="Wesley">Wesley</option>
+            </optgroup>
+            <optgroup label="Goleiros">
+                <option value="Alisson">Alisson</option>
+                <option value="Ederson">Ederson</option>
+                <option value="Weverton">Weverton</option>
+            </optgroup>
+            <option value="Gol Contra">Gol Contra (Adversário)</option>
+            <option value="Nenhum">Nenhum Gol do Brasil</option>
+        `;
+
         function iniciarTabela() {
             const container = document.getElementById('jogos-container');
             const selectMaster = document.getElementById('master-champion-select');
@@ -213,8 +212,23 @@
                     dataAtual = dataSemHora;
                 }
 
+                let isBrasil = jogo.timeC.includes("Brasil") || jogo.timeF.includes("Brasil");
+                let classeEspecial = isBrasil ? "match-brasil" : "";
+                
+                let htmlGolBrasil = "";
+                if (isBrasil) {
+                    htmlGolBrasil = `
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #555; text-align: left;">
+                            <label style="font-size: 0.8em; color: #ffcc00; font-weight: bold;">⭐ 1º Gol do Brasil na Partida:</label>
+                            <select id="gol_${jogo.idC.replace('_c', '')}" style="margin-top: 5px;">
+                                ${listaJogadoresBrasil}
+                            </select>
+                        </div>
+                    `;
+                }
+
                 htmlJogos += `
-                <div class="match-card" id="card_${jogo.idC}">
+                <div class="match-card ${classeEspecial}" id="card_${jogo.idC}">
                     <div class="match-date" id="date_${jogo.idC}">⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}</div>
                     <div class="match-row">
                         <span>${jogo.timeC}</span>
@@ -223,7 +237,8 @@
                         <input type="number" id="${jogo.idF}" min="0" placeholder="0">
                         <span>${jogo.timeF}</span>
                     </div>
-                    <button class="btn-salvar-jogo" id="btn_salvar_${jogo.idC}" onclick="salvarJogoUnico('${jogo.idC}', '${jogo.idF}')">⚽ Apostar R$ 10,00</button>
+                    ${htmlGolBrasil}
+                    <button class="btn-salvar-jogo" id="btn_salvar_${jogo.idC}" onclick="salvarJogoUnico('${jogo.idC}', '${jogo.idF}', ${isBrasil})">⚽ Apostar R$ 10,00</button>
                 </div>`;
             });
             container.innerHTML = htmlJogos;
@@ -246,11 +261,13 @@
                 const card = document.getElementById(`card_${jogo.idC}`);
                 const dateLabel = document.getElementById(`date_${jogo.idC}`);
                 const btnSalvar = document.getElementById(`btn_salvar_${jogo.idC}`);
+                const selectGol = document.getElementById('gol_' + idJogoReal);
                 
                 if(!inputC || !inputF) return;
 
                 if (MODO_TESTE) {
                     inputC.disabled = false; inputF.disabled = false;
+                    if(selectGol) selectGol.disabled = false;
                     if(btnSalvar) btnSalvar.disabled = false;
                     card.style.opacity = '1';
                     dateLabel.innerHTML = `✅ Modo Teste | ⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}`;
@@ -269,18 +286,21 @@
 
                 if (agora < inicioDoDia) {
                     inputC.disabled = true; inputF.disabled = true;
+                    if(selectGol) selectGol.disabled = true;
                     if(btnSalvar) btnSalvar.disabled = true;
                     card.style.opacity = '0.5';
                     dateLabel.innerHTML = `🔒 Abre dia ${jogo.data.split(' ')[0]} | ⏰ ${jogo.data.split(' ')[1]}`;
                     dateLabel.style.background = '#aa0000'; dateLabel.style.color = '#fff';
                 } else if (agora >= tempoLimite) {
                     inputC.disabled = true; inputF.disabled = true;
+                    if(selectGol) selectGol.disabled = true;
                     if(btnSalvar) btnSalvar.disabled = true;
                     card.style.opacity = '0.5';
                     dateLabel.innerHTML = `🚫 Encerrado | ⏰ ${jogo.data.split(' ')[1]}`;
                     dateLabel.style.background = '#444'; dateLabel.style.color = '#aaa';
                 } else {
                     inputC.disabled = false; inputF.disabled = false;
+                    if(selectGol) selectGol.disabled = false;
                     if(btnSalvar) btnSalvar.disabled = false;
                     card.style.opacity = '1';
                     dateLabel.innerHTML = `✅ Liberado | ⏰ ${jogo.data.split(' ')[1]} - ${jogo.grupo}`;
@@ -291,12 +311,12 @@
 
         function conectarUsuario() {
             const btn = document.getElementById('btn-entrar');
-            btn.innerText = "Conectando, aguarde...";
+            btn.innerText = "Conectando...";
             let celular = document.getElementById('login-celular').value.replace(/\D/g, '');
 
             if(!celular) {
                 btn.innerText = "ENTRAR NO BOLÃO";
-                return alert("Por favor, preencha o número de celular corretamente!");
+                return alert("Preencha o celular!");
             }
 
             db.collection("usuarios").doc(celular).set({
@@ -305,9 +325,6 @@
             }, {merge: true}).then(() => {
                 localStorage.setItem('bolao_user_celular', celular);
                 location.reload();
-            }).catch(erro => {
-                alert("⚠️ Erro de conexão com o banco: " + erro.message);
-                btn.innerText = "ENTRAR NO BOLÃO";
             });
         }
 
@@ -318,7 +335,6 @@
                     document.querySelector('.player-nickname').innerText = "Olá, " + dados.apelido;
                     
                     if(dados.campeaoApostado) document.getElementById('master-champion-select').value = dados.campeaoApostado;
-                    if(dados.primeiroGolApostado) document.getElementById('master-primeiro-gol-select').value = dados.primeiroGolApostado;
                     
                     if(dados.jogos) {
                         for (let idJogo in dados.jogos) {
@@ -336,6 +352,13 @@
                         }
                     }
 
+                    if(dados.golsBrasil) {
+                        for (let idJogo in dados.golsBrasil) {
+                            let selectGol = document.getElementById('gol_' + idJogo);
+                            if(selectGol) selectGol.value = dados.golsBrasil[idJogo];
+                        }
+                    }
+
                     verificarAcertos(dados);
 
                     if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
@@ -346,8 +369,6 @@
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('games-screen').classList.add('active');
                 }
-            }).catch(erro => {
-                alert("⚠️ Erro ao carregar sua conta: " + erro.message);
             });
         }
 
@@ -355,42 +376,66 @@
             todosOsJogosGlobais.forEach(jogo => {
                 let idJogo = jogo.idC.replace('_c', '');
                 let placarOficial = resultadosOficiais[idJogo];
-                let apostaUsuario = dadosUsuario && dadosUsuario.jogos ? dadosUsuario.jogos[idJogo] : null;
+                let golOficial = resultadosOficiais['gol_' + idJogo];
+                let apostaPlacar = dadosUsuario && dadosUsuario.jogos ? dadosUsuario.jogos[idJogo] : null;
+                let apostaGol = dadosUsuario && dadosUsuario.golsBrasil ? dadosUsuario.golsBrasil[idJogo] : null;
                 
+                let isBrasil = jogo.timeC.includes("Brasil") || jogo.timeF.includes("Brasil");
+
                 if (placarOficial) {
                     let card = document.getElementById('card_' + jogo.idC);
                     let btn = document.getElementById('btn_salvar_' + jogo.idC);
                     let inputC = document.getElementById(jogo.idC);
                     let inputF = document.getElementById(jogo.idF);
+                    let selectG = document.getElementById('gol_' + idJogo);
                     
                     if (btn) btn.style.display = 'none'; 
                     if (inputC) inputC.disabled = true; 
                     if (inputF) inputF.disabled = true;
+                    if (selectG) selectG.disabled = true;
                     
                     let aviso = document.createElement('div');
                     aviso.style.padding = "10px";
                     aviso.style.textAlign = "center";
                     aviso.style.borderRadius = "5px";
                     aviso.style.marginTop = "10px";
+                    aviso.style.fontWeight = "bold";
 
-                    if (apostaUsuario === placarOficial) {
-                        card.style.borderColor = "gold";
-                        card.style.boxShadow = "0 0 15px gold";
-                        card.style.opacity = "1";
-                        aviso.style.background = "gold";
-                        aviso.style.color = "#000";
-                        aviso.style.fontWeight = "bold";
-                        aviso.innerHTML = "🏆 VOCÊ ACERTOU O PLACAR E GANHOU!";
-                    } else if (apostaUsuario) {
-                        card.style.opacity = "0.7";
-                        aviso.style.background = "#331111";
-                        aviso.style.color = "#ff6666";
-                        aviso.innerHTML = "❌ Não foi dessa vez. (Real: " + placarOficial + ")";
+                    let acertouPlacar = (apostaPlacar === placarOficial);
+                    let acertouGol = isBrasil && (apostaGol === golOficial);
+
+                    if (isBrasil && apostaPlacar) {
+                        if (acertouPlacar && acertouGol) {
+                            card.style.borderColor = "gold"; card.style.boxShadow = "0 0 15px gold";
+                            aviso.style.background = "gold"; aviso.style.color = "#000";
+                            aviso.innerHTML = "🏆 GABARITOU! Acertou o Placar E o Gol!";
+                        } else if (acertouPlacar) {
+                            card.style.borderColor = "var(--primary)";
+                            aviso.style.background = "var(--primary)"; aviso.style.color = "#000";
+                            aviso.innerHTML = `✅ Acertou o Placar! (Gol Real: ${golOficial})`;
+                        } else if (acertouGol) {
+                            card.style.borderColor = "#0088ff";
+                            aviso.style.background = "#0088ff"; aviso.style.color = "#fff";
+                            aviso.innerHTML = `⚽ Acertou o Gol! (Placar Real: ${placarOficial})`;
+                        } else {
+                            card.style.opacity = "0.7";
+                            aviso.style.background = "#331111"; aviso.style.color = "#ff6666";
+                            aviso.innerHTML = `❌ Errou. (Real: ${placarOficial} | Gol: ${golOficial})`;
+                        }
+                    } else if (!isBrasil && apostaPlacar) {
+                        if (acertouPlacar) {
+                            card.style.borderColor = "gold"; card.style.boxShadow = "0 0 15px gold";
+                            aviso.style.background = "gold"; aviso.style.color = "#000";
+                            aviso.innerHTML = "🏆 VOCÊ ACERTOU O PLACAR!";
+                        } else {
+                            card.style.opacity = "0.7";
+                            aviso.style.background = "#331111"; aviso.style.color = "#ff6666";
+                            aviso.innerHTML = `❌ Errou. (Real: ${placarOficial})`;
+                        }
                     } else {
                         card.style.opacity = "0.5";
-                        aviso.style.background = "#222";
-                        aviso.style.color = "#aaa";
-                        aviso.innerHTML = "Fim de Jogo. (Resultado Oficial: " + placarOficial + ")";
+                        aviso.style.background = "#222"; aviso.style.color = "#aaa";
+                        aviso.innerHTML = "Fim de Jogo. (Sem aposta sua)";
                     }
                     card.appendChild(aviso);
                 }
@@ -400,9 +445,20 @@
         function habilitarBotoesAdminResultados() {
             todosOsJogosGlobais.forEach(jogo => {
                 let idJogo = jogo.idC.replace('_c', '');
+                let isBrasil = jogo.timeC.includes("Brasil") || jogo.timeF.includes("Brasil");
+
                 if (!resultadosOficiais[idJogo]) {
                     let card = document.getElementById('card_' + jogo.idC);
                     if(card) {
+                        let htmlExtraAdmin = "";
+                        if (isBrasil) {
+                            htmlExtraAdmin = `
+                                <select id="admin_gol_${idJogo}" style="width: 100%; margin: 8px 0; border: 1px solid red;">
+                                    ${listaJogadoresBrasil}
+                                </select>
+                            `;
+                        }
+
                         let div = document.createElement('div');
                         div.style.marginTop = "15px"; 
                         div.style.borderTop = "1px dashed red"; 
@@ -411,7 +467,8 @@
                         div.innerHTML = `
                             <p style="color:red; font-size:0.85em; margin:0 0 8px 0; font-weight:bold;">👑 ADMIN: Lançar placar REAL (Fim de Jogo)</p>
                             <input type="text" id="admin_real_${idJogo}" placeholder="Ex: 2x1" style="width:100px; display:inline-block; padding:8px; text-align:center;">
-                            <button onclick="salvarResultadoOficial('${idJogo}')" style="background:red; color:white; font-weight:bold; border:none; padding:10px; border-radius:5px; cursor:pointer;">Lançar Oficial</button>
+                            ${htmlExtraAdmin}
+                            <button onclick="salvarResultadoOficial('${idJogo}', ${isBrasil})" style="background:red; color:white; font-weight:bold; border:none; padding:10px; border-radius:5px; cursor:pointer; width:100%; margin-top:5px;">Lançar Resultado Oficial</button>
                         `;
                         card.appendChild(div);
                     }
@@ -419,15 +476,19 @@
             });
         }
 
-        window.salvarResultadoOficial = function(idJogo) {
-            let val = document.getElementById('admin_real_' + idJogo).value;
-            if(!val || !val.includes('x')) return alert("Por favor, digite o resultado no formato exato: 2x1");
+        window.salvarResultadoOficial = function(idJogo, isBrasil) {
+            let placar = document.getElementById('admin_real_' + idJogo).value;
+            let gol = isBrasil ? document.getElementById('admin_gol_' + idJogo).value : null;
+
+            if(!placar || !placar.includes('x')) return alert("Por favor, digite o resultado no formato: 2x1");
+            if(isBrasil && !gol) return alert("Selecione quem fez o gol do Brasil na vida real!");
             
-            if(confirm("Tem a certeza que o jogo terminou " + val + "? Todos os jogadores verão isso agora!")) {
-                db.collection("sistema").doc("resultados").set({
-                    [idJogo]: val
-                }, {merge: true}).then(() => {
-                    alert("✅ Resultado oficial salvo! Os ganhadores já receberam o troféu no ecrã deles.");
+            if(confirm("Tem certeza que este é o resultado oficial final? A tabela será atualizada para todos!")) {
+                let atualizacao = { [idJogo]: placar };
+                if(isBrasil) atualizacao['gol_' + idJogo] = gol;
+
+                db.collection("sistema").doc("resultados").set(atualizacao, {merge: true}).then(() => {
+                    alert("✅ Oficial salvo com sucesso!");
                     location.reload();
                 });
             }
@@ -442,7 +503,7 @@
                     if(u.jogos) { for(let k in u.jogos) totalJogos++; }
                     html += `<div class="card" style="margin-bottom: 10px;">
                         <strong>${u.apelido}</strong> - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}<br>
-                        <span style="font-size: 0.8em; color: #aaa;">Cam: ${u.campeaoApostado || 'Não'} | 1º Gol: ${u.primeiroGolApostado || 'Não'} | Jogos: ${totalJogos}/72</span><br>
+                        <span style="font-size: 0.8em; color: #aaa;">Cam: ${u.campeaoApostado || 'Não'} | Jogos: ${totalJogos}/72</span><br>
                         <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
                             ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
                         </button>
@@ -456,24 +517,33 @@
         function confirmarPagamento(id, status) { db.collection("usuarios").doc(id).update({pago: status}); }
         function excluirUsuario(id) { if(confirm("Apagar usuário?")) db.collection("usuarios").doc(id).delete(); }
 
-        function salvarJogoUnico(idC, idF) {
+        function salvarJogoUnico(idC, idF, isBrasil) {
             const cel = localStorage.getItem('bolao_user_celular');
             const inputCasa = document.getElementById(idC);
             const inputFora = document.getElementById(idF);
             const btn = document.getElementById('btn_salvar_' + idC);
-
+            const jogoId = idC.replace('_c', '');
+            
             if(!inputCasa || !inputFora || inputCasa.value === "" || inputFora.value === "") {
-                return alert("Preencha o placar das duas seleções neste jogo!");
+                return alert("Preencha o placar das duas seleções!");
             }
 
-            const jogoId = idC.replace('_c', '');
-            const placar = inputCasa.value + "x" + inputFora.value;
+            let golEscolhido = null;
+            if(isBrasil) {
+                const selectGol = document.getElementById('gol_' + jogoId);
+                if(!selectGol || selectGol.value === "") {
+                    return alert("Neste jogo do Brasil, você também precisa escolher o autor do 1º Gol!");
+                }
+                golEscolhido = selectGol.value;
+            }
 
+            const placar = inputCasa.value + "x" + inputFora.value;
             btn.innerText = "Apostando...";
 
-            db.collection("usuarios").doc(cel).set({
-                jogos: { [jogoId]: placar }
-            }, {merge: true}).then(() => {
+            let dadosAtualizacao = { jogos: { [jogoId]: placar } };
+            if(isBrasil) dadosAtualizacao.golsBrasil = { [jogoId]: golEscolhido };
+
+            db.collection("usuarios").doc(cel).set(dadosAtualizacao, {merge: true}).then(() => {
                 btn.innerText = "✏️ Alterar Aposta";
                 btn.style.background = "#444";
                 btn.style.color = "#fff";
@@ -481,32 +551,20 @@
                 const pixArea = document.getElementById('pix-area');
                 pixArea.style.display = 'block';
                 pixArea.scrollIntoView({ behavior: 'smooth' });
-                
-            }).catch(erro => {
-                alert("⚠️ Erro ao salvar o jogo: " + erro.message);
-                btn.innerText = "⚽ Apostar R$ 10,00";
             });
         }
 
-        function salvarApostasMaster() {
+        function salvarApostaCampeao() {
             const campeao = document.getElementById('master-champion-select').value;
-            const primeiroGol = document.getElementById('master-primeiro-gol-select').value;
             const cel = localStorage.getItem('bolao_user_celular');
 
-            if(!campeao || !primeiroGol) return alert("Por favor, escolha a seleção campeã E o autor do primeiro gol!");
+            if(!campeao) return alert("Escolha a seleção campeã!");
 
             db.collection("usuarios").doc(cel).update({
-                campeaoApostado: campeao,
-                primeiroGolApostado: primeiroGol
+                campeaoApostado: campeao
             }).then(() => {
-                alert("Apostas Master salvas com sucesso!");
-                
-                const pixArea = document.getElementById('pix-area');
-                pixArea.style.display = 'block';
-                pixArea.scrollIntoView({ behavior: 'smooth' });
-                
-            }).catch(erro => {
-                alert("⚠️ Erro ao salvar apostas master: " + erro.message);
+                alert("Seleção Campeã salva com sucesso!");
+                document.getElementById('pix-area').style.display = 'block';
             });
         }
 
@@ -515,9 +573,7 @@
             chaveInput.select();
             chaveInput.setSelectionRange(0, 99999); 
             navigator.clipboard.writeText(chaveInput.value).then(() => {
-                alert("Chave PIX copiada com sucesso: " + chaveInput.value);
-            }).catch(err => {
-                alert("Erro ao copiar. Copie manualmente a chave: " + chaveInput.value);
+                alert("Chave PIX copiada: " + chaveInput.value);
             });
         }
 
@@ -527,21 +583,16 @@
         }
 
         window.onload = () => {
-            try {
-                db.collection("sistema").doc("resultados").get().then(doc => {
-                    if(doc.exists) resultadosOficiais = doc.data();
-                    
-                    iniciarTabela();
-                    const salvo = localStorage.getItem('bolao_user_celular');
-                    if(salvo) carregarSessao(salvo);
-                }).catch(e => {
-                    iniciarTabela();
-                    const salvo = localStorage.getItem('bolao_user_celular');
-                    if(salvo) carregarSessao(salvo);
-                });
-            } catch(erro) {
-                alert("Erro ao iniciar a tela. Tente recarregar a página.");
-            }
+            db.collection("sistema").doc("resultados").get().then(doc => {
+                if(doc.exists) resultadosOficiais = doc.data();
+                iniciarTabela();
+                const salvo = localStorage.getItem('bolao_user_celular');
+                if(salvo) carregarSessao(salvo);
+            }).catch(e => {
+                iniciarTabela();
+                const salvo = localStorage.getItem('bolao_user_celular');
+                if(salvo) carregarSessao(salvo);
+            });
         };
     </script>
 </body>
