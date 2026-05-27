@@ -43,12 +43,11 @@
         
         .pix-container { display: flex; gap: 8px; margin-top: 10px; align-items: center; justify-content: center; }
         .btn-copiar { background: var(--primary); color: #111; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .label-pequena { font-size: 0.8em; color: #aaa; margin: 10px 0 2px 0; display: block; }
     </style>
     <script>
-        window.onerror = function(msg, url, line) {
-            alert("⚠️ Erro detetado na linha " + line + ": " + msg);
-            return false;
-        };
+        window.onerror = function(msg, url, line) { alert("⚠️ Erro detetado na linha " + line + ": " + msg); return false; };
     </script>
 </head>
 <body>
@@ -66,12 +65,54 @@
             <h2 class="player-nickname" style="color: var(--primary); text-align: center; margin-bottom: 20px;">Bem-vindo</h2>
             
             <div class="card" style="border-color: var(--primary);">
-                <h3 style="color: var(--primary); margin-top: 0;">🏆 Aposta Master</h3>
-                <p style="font-size: 0.85em; color: #ccc;">Quem será o grande Campeão do Mundo?</p>
+                <h3 style="color: var(--primary); margin-top: 0;">👑 Apostas Master</h3>
+                
+                <label class="label-pequena">Quem será o grande Campeão do Mundo?</label>
                 <select id="master-champion-select">
                     <option value="">Escolha a seleção campeã...</option>
                 </select>
-                <button class="btn-master" onclick="salvarCampeao()">SALVAR SELEÇÃO CAMPEÃ (R$ 10,00)</button>
+
+                <label class="label-pequena">Quem será o Artilheiro do Brasil na Copa?</label>
+                <select id="master-artilheiro-select">
+                    <option value="">Escolha o jogador...</option>
+                    <optgroup label="Atacantes">
+                        <option value="Endrick">Endrick</option>
+                        <option value="Gabriel Martinelli">Gabriel Martinelli</option>
+                        <option value="Igor Thiago">Igor Thiago</option>
+                        <option value="Luiz Henrique">Luiz Henrique</option>
+                        <option value="Matheus Cunha">Matheus Cunha</option>
+                        <option value="Neymar Júnior">Neymar Júnior</option>
+                        <option value="Raphinha">Raphinha</option>
+                        <option value="Rayan">Rayan</option>
+                        <option value="Vinícius Júnior">Vinícius Júnior</option>
+                    </optgroup>
+                    <optgroup label="Meio-campistas">
+                        <option value="Bruno Guimarães">Bruno Guimarães</option>
+                        <option value="Casemiro">Casemiro</option>
+                        <option value="Danilo (Volante)">Danilo (Volante)</option>
+                        <option value="Fabinho">Fabinho</option>
+                        <option value="Lucas Paquetá">Lucas Paquetá</option>
+                    </optgroup>
+                    <optgroup label="Defensores (Zagueiros e Laterais)">
+                        <option value="Alex Sandro">Alex Sandro</option>
+                        <option value="Bremer">Bremer</option>
+                        <option value="Danilo (Lateral)">Danilo (Lateral)</option>
+                        <option value="Douglas Santos">Douglas Santos</option>
+                        <option value="Gabriel Magalhães">Gabriel Magalhães</option>
+                        <option value="Ibañez">Ibañez</option>
+                        <option value="Léo Pereira">Léo Pereira</option>
+                        <option value="Marquinhos">Marquinhos</option>
+                        <option value="Wesley">Wesley</option>
+                    </optgroup>
+                    <optgroup label="Goleiros">
+                        <option value="Alisson">Alisson</option>
+                        <option value="Ederson">Ederson</option>
+                        <option value="Weverton">Weverton</option>
+                    </optgroup>
+                    <option value="Outro Jogador">Outro Jogador</option>
+                </select>
+
+                <button class="btn-master" onclick="salvarApostasMaster()">SALVAR APOSTAS MASTER (R$ 10,00)</button>
             </div>
 
             <div class="card">
@@ -83,9 +124,7 @@
             <div id="pix-area" class="card">
                 <h3 style="color: var(--primary); margin: 0;">✅ Aposta Registrada!</h3>
                 <p>Para validar a sua participação, efetue o pagamento de <strong>R$ 10,00</strong>.</p>
-                
                 <p style="font-size: 0.9em; margin-bottom: 5px; margin-top: 15px;">Chave PIX (Celular):</p>
-                
                 <div class="pix-container">
                     <input type="text" value="63652161572" readonly id="chave-pix" style="text-align: center; margin: 0; color: #00ff87; border: 1px solid #00ff87; background: #111; font-weight: bold; font-size: 1.1em; flex: 1;">
                     <button class="btn-copiar" onclick="copiarPix()">Copiar</button>
@@ -108,9 +147,8 @@
         const CELULAR_ADMIN = "75992637960";
 
         const MODO_TESTE = false; 
-        
         let todosOsJogosGlobais = [];
-        let resultadosOficiais = {}; // Nova variável para guardar os placares reais
+        let resultadosOficiais = {}; 
 
         const gruposCopa = [
             { nome: "Grupo A", times: ["🇲🇽 México", "🇿🇦 África do Sul", "🇰🇷 Coreia do Sul", "🇨🇿 Rep. Tcheca"], datas: ["11/06 16:00", "11/06 23:00", "18/06 13:00", "18/06 22:00", "24/06 22:00", "24/06 22:00"] },
@@ -200,7 +238,6 @@
             todosOsJogosGlobais.forEach(jogo => {
                 const idJogoReal = jogo.idC.replace('_c', '');
                 
-                // Se o jogo já tem resultado oficial lançado pelo Admin, ignora o tempo e mantém bloqueado
                 if(resultadosOficiais[idJogoReal]) return; 
 
                 const inputC = document.getElementById(jogo.idC);
@@ -280,6 +317,7 @@
                     document.querySelector('.player-nickname').innerText = "Olá, " + dados.apelido;
                     
                     if(dados.campeaoApostado) document.getElementById('master-champion-select').value = dados.campeaoApostado;
+                    if(dados.artilheiroApostado) document.getElementById('master-artilheiro-select').value = dados.artilheiroApostado;
                     
                     if(dados.jogos) {
                         for (let idJogo in dados.jogos) {
@@ -297,14 +335,12 @@
                         }
                     }
 
-                    // Verifica se a pessoa ganhou ou perdeu com base nos resultados oficiais
                     verificarAcertos(dados);
 
-                    // Modo Admin
                     if(celular.replace(/\D/g, '') === CELULAR_ADMIN.replace(/\D/g, '')) {
                         document.getElementById('admin-panel').style.display = 'block';
                         carregarListaPagamentos();
-                        habilitarBotoesAdminResultados(); // Ativa os botões secretos do Admin
+                        habilitarBotoesAdminResultados();
                     }
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('games-screen').classList.add('active');
@@ -314,7 +350,6 @@
             });
         }
 
-        // FUNÇÃO NOVA: Pinta de Ouro se a pessoa acertou o placar real!
         function verificarAcertos(dadosUsuario) {
             todosOsJogosGlobais.forEach(jogo => {
                 let idJogo = jogo.idC.replace('_c', '');
@@ -327,8 +362,8 @@
                     let inputC = document.getElementById(jogo.idC);
                     let inputF = document.getElementById(jogo.idF);
                     
-                    if (btn) btn.style.display = 'none'; // Some com o botão de apostar
-                    if (inputC) inputC.disabled = true; // Bloqueia digitação
+                    if (btn) btn.style.display = 'none'; 
+                    if (inputC) inputC.disabled = true; 
                     if (inputF) inputF.disabled = true;
                     
                     let aviso = document.createElement('div');
@@ -338,7 +373,6 @@
                     aviso.style.marginTop = "10px";
 
                     if (apostaUsuario === placarOficial) {
-                        // ACERTOU!
                         card.style.borderColor = "gold";
                         card.style.boxShadow = "0 0 15px gold";
                         card.style.opacity = "1";
@@ -347,13 +381,11 @@
                         aviso.style.fontWeight = "bold";
                         aviso.innerHTML = "🏆 VOCÊ ACERTOU O PLACAR E GANHOU!";
                     } else if (apostaUsuario) {
-                        // ERROU
                         card.style.opacity = "0.7";
                         aviso.style.background = "#331111";
                         aviso.style.color = "#ff6666";
                         aviso.innerHTML = "❌ Não foi dessa vez. (Real: " + placarOficial + ")";
                     } else {
-                        // NÃO JOGOU
                         card.style.opacity = "0.5";
                         aviso.style.background = "#222";
                         aviso.style.color = "#aaa";
@@ -364,11 +396,9 @@
             });
         }
 
-        // FUNÇÃO NOVA ADMIN: Adiciona a caixinha secreta para você lançar o placar oficial
         function habilitarBotoesAdminResultados() {
             todosOsJogosGlobais.forEach(jogo => {
                 let idJogo = jogo.idC.replace('_c', '');
-                // Só mostra a caixa do admin se o resultado ainda não foi lançado
                 if (!resultadosOficiais[idJogo]) {
                     let card = document.getElementById('card_' + jogo.idC);
                     if(card) {
@@ -388,7 +418,6 @@
             });
         }
 
-        // FUNÇÃO NOVA ADMIN: Salva o resultado no banco
         window.salvarResultadoOficial = function(idJogo) {
             let val = document.getElementById('admin_real_' + idJogo).value;
             if(!val || !val.includes('x')) return alert("Por favor, digite o resultado no formato exato: 2x1");
@@ -412,7 +441,7 @@
                     if(u.jogos) { for(let k in u.jogos) totalJogos++; }
                     html += `<div class="card" style="margin-bottom: 10px;">
                         <strong>${u.apelido}</strong> - ${u.pago ? '✅ PAGO' : '❌ PENDENTE'}<br>
-                        <span style="font-size: 0.8em; color: #aaa;">Cam: ${u.campeaoApostado || 'Não'} | Jogos: ${totalJogos}/72</span><br>
+                        <span style="font-size: 0.8em; color: #aaa;">Cam: ${u.campeaoApostado || 'Não'} | Art: ${u.artilheiroApostado || 'Não'} | Jogos: ${totalJogos}/72</span><br>
                         <button class="${u.pago ? 'btn-confirmado' : 'btn-pago'}" onclick="confirmarPagamento('${doc.id}', ${!u.pago})">
                             ${u.pago ? 'Desmarcar' : 'Confirmar Pagamento'}
                         </button>
@@ -458,23 +487,25 @@
             });
         }
 
-        function salvarCampeao() {
+        function salvarApostasMaster() {
             const campeao = document.getElementById('master-champion-select').value;
+            const artilheiro = document.getElementById('master-artilheiro-select').value;
             const cel = localStorage.getItem('bolao_user_celular');
 
-            if(!campeao) return alert("Por favor, selecione uma seleção para ser a campeã!");
+            if(!campeao || !artilheiro) return alert("Por favor, escolha a seleção campeã E o artilheiro do Brasil!");
 
             db.collection("usuarios").doc(cel).update({
-                campeaoApostado: campeao
+                campeaoApostado: campeao,
+                artilheiroApostado: artilheiro
             }).then(() => {
-                alert("Seleção Campeã salva com sucesso!");
+                alert("Apostas Master salvas com sucesso!");
                 
                 const pixArea = document.getElementById('pix-area');
                 pixArea.style.display = 'block';
                 pixArea.scrollIntoView({ behavior: 'smooth' });
                 
             }).catch(erro => {
-                alert("⚠️ Erro ao salvar campeão: " + erro.message);
+                alert("⚠️ Erro ao salvar apostas master: " + erro.message);
             });
         }
 
@@ -496,7 +527,6 @@
 
         window.onload = () => {
             try {
-                // PRIMEIRO passo de todos: O sistema busca os Resultados Oficiais no banco
                 db.collection("sistema").doc("resultados").get().then(doc => {
                     if(doc.exists) resultadosOficiais = doc.data();
                     
@@ -504,7 +534,6 @@
                     const salvo = localStorage.getItem('bolao_user_celular');
                     if(salvo) carregarSessao(salvo);
                 }).catch(e => {
-                    // Se a internet falhar ao buscar resultados, o site abre normal mesmo assim
                     iniciarTabela();
                     const salvo = localStorage.getItem('bolao_user_celular');
                     if(salvo) carregarSessao(salvo);
