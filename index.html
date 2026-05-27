@@ -72,13 +72,38 @@
 
         <section id="games-screen" class="screen">
             <h2 class="player-nickname" style="color: var(--primary); text-align: center; margin-bottom: 20px;">Bem-vindo</h2>
-            
+            <div class="card" style="border: 1px solid #ff4444; background: #2a1111; margin-bottom: 20px;">
+        <h3 style="color: #ff4444; text-align: center; margin-top: 0;">🤡 MURAL DA VERGONHA</h3>
+        <div id="ranking-container"></div>
+    </div>
             <div class="card" style="border-color: var(--primary);">
                 <h3 style="color: var(--primary); margin-top: 0;">👑 Aposta Master</h3>
                 <label class="label-pequena">Quem será o grande Campeão do Mundo?</label>
                 <select id="master-champion-select">
                     <option value="">Escolha a seleção campeã...</option>
                 </select>
+               function atualizarRanking() {
+    db.collection("usuarios").onSnapshot(snapshot => {
+        let lista = [];
+        snapshot.forEach(doc => {
+            let u = doc.data();
+            let pts = 0;
+            if(u.jogos) {
+                for(let id in u.jogos) {
+                    if(resultadosOficiais[id] && u.jogos[id] === resultadosOficiais[id]) pts += 3;
+                }
+            }
+            lista.push({ nome: u.apelido || "Anon", pts: pts });
+        });
+        lista.sort((a,b) => b.pts - a.pts);
+        let html = '<table style="width:100%">';
+        lista.forEach((u, i) => {
+            let cor = i < 3 ? "#00ff87" : "#aaa";
+            html += `<tr style="border-bottom:1px solid #444"><td style="color:${cor}">${i+1}º ${u.nome}</td><td style="text-align:right">${u.pts} pts</td></tr>`;
+        });
+        document.getElementById('ranking-container').innerHTML = html + '</table>';
+    });
+}
                 <button class="btn-master" onclick="salvarApostaCampeao()">SALVAR CAMPEÃO (R$ 20,00)</button>
             </div>
 
