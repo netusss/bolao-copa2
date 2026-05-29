@@ -610,4 +610,33 @@
 </script>
       </a>
 </body>
+    <script>
+        // ... (toda a sua lógica de Firebase e outras funções)
+
+        window.conectarUsuario = function() {
+            const btn = document.getElementById('btn-entrar');
+            btn.innerText = "Conectando...";
+            let celular = document.getElementById('login-celular').value.replace(/\D/g, '');
+            let nome = document.getElementById('login-nome').value;
+            let apelido = document.getElementById('login-apelido').value;
+
+            if(!nome || !celular || !apelido) {
+                btn.innerText = "ENTRAR NO BOLÃO";
+                return alert("Preencha todos os campos!");
+            }
+
+            db.collection("usuarios").doc(celular).set({
+                nome: nome,
+                apelido: apelido
+            }, {merge: true}).then(() => {
+                localStorage.setItem('bolao_user_celular', celular);
+                location.reload();
+            }).catch((error) => {
+                btn.innerText = "ENTRAR NO BOLÃO";
+                alert("Erro: " + error.message);
+            });
+        };
+    </script>
+</body>
+</html>
 </html>
